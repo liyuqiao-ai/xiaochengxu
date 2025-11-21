@@ -75,41 +75,69 @@ Page({
       return;
     }
 
-    try {
-      wx.showLoading({ title: '处理中...' });
+    wx.showModal({
+      title: '确认加入',
+      content: '确定要加入此工头的团队吗？',
+      success: async (res) => {
+        if (res.confirm) {
+          try {
+            wx.showLoading({ title: '处理中...' });
 
-      const result = await wx.cloud.callFunction({
-        name: 'joinTeam',
-        data: {
-          contractorId: task.contractorId,
-          orderId: task._id,
-        },
-      });
+            const result = await wx.cloud.callFunction({
+              name: 'joinTeam',
+              data: {
+                contractorId: task.contractorId,
+                orderId: task._id,
+              },
+            });
 
-      wx.hideLoading();
+            wx.hideLoading();
 
-      if (result.result.success) {
-        wx.showToast({
-          title: '加入成功',
-          icon: 'success',
-        });
-        setTimeout(() => {
-          wx.navigateBack();
-        }, 1500);
-      } else {
-        wx.showToast({
-          title: result.result.error || '加入失败',
-          icon: 'none',
-        });
-      }
-    } catch (error) {
-      wx.hideLoading();
-      console.error('加入团队失败:', error);
+            if (result.result.success) {
+              wx.showToast({
+                title: '申请已提交',
+                icon: 'success',
+              });
+              setTimeout(() => {
+                wx.navigateBack();
+              }, 1500);
+            } else {
+              wx.showToast({
+                title: result.result.error || '申请失败',
+                icon: 'none',
+              });
+            }
+          } catch (error) {
+            wx.hideLoading();
+            console.error('加入团队失败:', error);
+            wx.showToast({
+              title: '申请失败',
+              icon: 'none',
+            });
+          }
+        }
+      },
+    });
+  },
+
+  /**
+   * 联系工头
+   */
+  contactContractor() {
+    const { task } = this.data;
+    if (!task || !task.contractorId) {
       wx.showToast({
-        title: '加入失败',
+        title: '任务信息不完整',
         icon: 'none',
       });
+      return;
     }
+
+    // TODO: 实现联系工头功能（可能需要获取工头电话或微信）
+    wx.showToast({
+      title: '功能开发中',
+      icon: 'none',
+    });
   },
 
   /**

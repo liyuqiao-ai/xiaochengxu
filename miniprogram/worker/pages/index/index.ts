@@ -38,13 +38,20 @@ Page({
     try {
       this.setData({ loading: true });
 
-      // 获取附近任务
+      // 获取用户位置
+      const location = await this.getLocation();
+
+      // 获取附近任务（状态为confirmed或in_progress的订单）
       const nearbyResult = await wx.cloud.callFunction({
         name: 'getNearbyTasks',
-        data: {},
+        data: {
+          lat: location?.latitude,
+          lng: location?.longitude,
+          radius: 50000, // 50公里
+        },
       });
 
-      // 获取我的任务
+      // 获取我的任务（通过contractorId关联的订单）
       const myTasksResult = await wx.cloud.callFunction({
         name: 'getMyTasks',
         data: {},
@@ -71,6 +78,19 @@ Page({
         icon: 'none',
       });
     }
+  },
+
+  /**
+   * 获取位置信息
+   */
+  getLocation(): Promise<any> {
+    return new Promise((resolve, reject) => {
+      wx.getLocation({
+        type: 'gcj02',
+        success: resolve,
+        fail: reject,
+      });
+    });
   },
 
   /**

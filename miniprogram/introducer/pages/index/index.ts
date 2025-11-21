@@ -77,6 +77,14 @@ Page({
    * 复制推广码
    */
   copyPromotionCode() {
+    if (!this.data.promotionCode) {
+      wx.showToast({
+        title: '推广码不存在',
+        icon: 'none',
+      });
+      return;
+    }
+
     wx.setClipboardData({
       data: this.data.promotionCode,
       success: () => {
@@ -85,6 +93,17 @@ Page({
           icon: 'success',
         });
       },
+    });
+  },
+
+  /**
+   * 生成推广二维码
+   */
+  generateQRCode() {
+    // TODO: 实现二维码生成功能
+    wx.showToast({
+      title: '功能开发中',
+      icon: 'none',
     });
   },
 
