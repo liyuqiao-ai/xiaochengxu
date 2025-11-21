@@ -9,21 +9,14 @@
 // 云环境ID配置
 // 请在微信开发者工具中：云开发 -> 设置 -> 环境设置 中获取环境ID
 // 或者使用 cloud.DYNAMIC_CURRENT_ENV 自动使用当前环境
-const CLOUD_ENV_ID = 'your-env-id'; // ⚠️ 请替换为实际的云环境ID，或使用 cloud.DYNAMIC_CURRENT_ENV
+const CLOUD_ENV_ID = 'cloud1-3g2i1jqra6ba039d'; // 云环境ID
 
 App({
   onLaunch() {
     // 初始化云开发
     if (wx.cloud) {
-      // 检查是否配置了环境ID
-      if (CLOUD_ENV_ID === 'your-env-id') {
-        console.warn('⚠️ 请先配置云环境ID！在 miniprogram/app.ts 中设置 CLOUD_ENV_ID');
-        wx.showModal({
-          title: '配置提示',
-          content: '请先配置云环境ID，否则无法使用云开发功能',
-          showCancel: false,
-        });
-      }
+      // 云环境ID已配置
+      console.log('✅ 云环境ID已配置:', CLOUD_ENV_ID);
 
       wx.cloud.init({
         env: CLOUD_ENV_ID, // 云环境ID

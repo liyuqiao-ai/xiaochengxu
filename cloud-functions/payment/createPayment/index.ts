@@ -168,11 +168,14 @@ export const main = async (event: any) => {
     const nonceStr = generateNonceStr();
 
     // 7. 调用微信支付统一下单
+    // 支付回调地址：需要在微信支付商户平台配置
+    // 格式：https://你的云环境ID.service.weixin.qq.com/payment/payCallback
+    // 或者使用云函数的HTTP触发地址
     const wxPayConfig = {
       appid: 'wxbc618555fee468d1',
       mch_id: process.env.WX_PAY_MCHID || '',
       key: process.env.WX_PAY_KEY || '',
-      notify_url: `${process.env.CLOUD_BASE_URL}/payment/payCallback`,
+      notify_url: process.env.CLOUD_BASE_URL || `https://cloud1-3g2i1jqra6ba039d.service.weixin.qq.com/payment/payCallback`,
     };
 
     const unifiedOrderResult = await unifiedOrder({
