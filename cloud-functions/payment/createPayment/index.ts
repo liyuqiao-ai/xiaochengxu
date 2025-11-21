@@ -11,7 +11,7 @@ import {
   ErrorCode,
 } from '../../../shared/utils/errors';
 import { authMiddleware } from '../../../shared/middleware/auth';
-import { PricingEngine } from '../../../shared/utils/pricing';
+import { PricingEngine } from '../../settlement/calculatePayment/index';
 
 cloud.init({
   env: cloud.DYNAMIC_CURRENT_ENV,

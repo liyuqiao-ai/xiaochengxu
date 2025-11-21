@@ -1,0 +1,25 @@
+{
+  "name": "agriculture-worker-admin-dashboard",
+  "version": "1.0.0",
+  "description": "农业零工数字化平台管理后台",
+  "private": true,
+  "scripts": {
+    "dev": "umi dev",
+    "build": "umi build",
+    "test": "umi test"
+  },
+  "dependencies": {
+    "@ant-design/pro-components": "^2.0.0",
+    "@ant-design/pro-layout": "^7.0.0",
+    "antd": "^5.0.0",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
+    "typescript": "^4.9.0",
+    "umi": "^4.0.0"
+  }
+}
+

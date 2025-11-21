@@ -2,7 +2,7 @@
  * 计价引擎单元测试
  */
 
-import { PricingEngine } from '../../shared/utils/pricing';
+import { PricingEngine } from '../../cloud-functions/settlement/calculatePayment/index';
 import { Order } from '../../shared/types/order';
 
 describe('PricingEngine', () => {

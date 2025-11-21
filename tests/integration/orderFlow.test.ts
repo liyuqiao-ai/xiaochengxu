@@ -3,7 +3,7 @@
  */
 
 import { OrderStateMachine } from '../../shared/utils/orderStateMachine';
-import { PricingEngine } from '../../shared/utils/pricing';
+import { PricingEngine } from '../../cloud-functions/settlement/calculatePayment/index';
 import { Order } from '../../shared/types/order';
 
 describe('订单完整流程', () => {

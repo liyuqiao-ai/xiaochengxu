@@ -3,7 +3,7 @@
  */
 
 import { cloud } from 'wx-server-sdk';
-import { PricingEngine } from '../../../shared/utils/pricing';
+import { PricingEngine } from '../../settlement/calculatePayment/index';
 import { createDatabase } from '../../../shared/utils/db';
 import { optimisticUpdate } from '../../../shared/utils/transaction';
 import { validateId, validateAmount } from '../../../shared/utils/inputValidation';
