@@ -99,12 +99,50 @@ Page({
   /**
    * 生成推广二维码
    */
-  generateQRCode() {
-    // TODO: 实现二维码生成功能
-    wx.showToast({
-      title: '功能开发中',
-      icon: 'none',
-    });
+  async generateQRCode() {
+    if (!this.data.promotionCode) {
+      wx.showToast({
+        title: '推广码不存在',
+        icon: 'none',
+      });
+      return;
+    }
+
+    try {
+      wx.showLoading({ title: '生成中...' });
+
+      // 调用云函数生成小程序码
+      const result = await wx.cloud.callFunction({
+        name: 'generateQRCode',
+        data: {
+          scene: `promotion=${this.data.promotionCode}`,
+          page: 'pages/index/index',
+          width: 280,
+        },
+      });
+
+      wx.hideLoading();
+
+      if (result.result.success && result.result.data?.fileID) {
+        // 预览二维码
+        wx.previewImage({
+          urls: [result.result.data.fileID],
+          current: result.result.data.fileID,
+        });
+      } else {
+        wx.showToast({
+          title: result.result.error || '生成失败',
+          icon: 'none',
+        });
+      }
+    } catch (error) {
+      wx.hideLoading();
+      console.error('生成二维码失败:', error);
+      wx.showToast({
+        title: '生成失败',
+        icon: 'none',
+      });
+    }
   },
 
   /**

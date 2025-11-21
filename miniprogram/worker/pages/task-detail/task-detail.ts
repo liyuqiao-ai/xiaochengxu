@@ -123,7 +123,7 @@ Page({
   /**
    * 联系工头
    */
-  contactContractor() {
+  async contactContractor() {
     const { task } = this.data;
     if (!task || !task.contractorId) {
       wx.showToast({
@@ -133,11 +133,73 @@ Page({
       return;
     }
 
-    // TODO: 实现联系工头功能（可能需要获取工头电话或微信）
-    wx.showToast({
-      title: '功能开发中',
-      icon: 'none',
-    });
+    try {
+      // 获取工头信息
+      const result = await wx.cloud.callFunction({
+        name: 'getUserInfo',
+        data: { userId: task.contractorId },
+      });
+
+      if (result.result.success && result.result.data?.user) {
+        const contractor = result.result.data.user;
+        
+        // 显示联系方式选择
+        const contactMethods: string[] = [];
+        if (contractor.phone) {
+          contactMethods.push('电话');
+        }
+        if (contractor.wechat) {
+          contactMethods.push('微信');
+        }
+
+        if (contactMethods.length === 0) {
+          wx.showToast({
+            title: '工头未设置联系方式',
+            icon: 'none',
+          });
+          return;
+        }
+
+        wx.showActionSheet({
+          itemList: contactMethods,
+          success: (res) => {
+            const method = contactMethods[res.tapIndex];
+            if (method === '电话' && contractor.phone) {
+              wx.makePhoneCall({
+                phoneNumber: contractor.phone,
+                fail: () => {
+                  wx.showToast({
+                    title: '拨打电话失败',
+                    icon: 'none',
+                  });
+                },
+              });
+            } else if (method === '微信' && contractor.wechat) {
+              wx.setClipboardData({
+                data: contractor.wechat,
+                success: () => {
+                  wx.showToast({
+                    title: '微信号已复制',
+                    icon: 'success',
+                  });
+                },
+              });
+            }
+          },
+        });
+      } else {
+        wx.showToast({
+          title: '获取工头信息失败',
+          icon: 'none',
+        });
+      }
+    } catch (error) {
+      console.error('联系工头失败:', error);
+      wx.showToast({
+        title: '获取联系方式失败',
+        icon: 'none',
+      });
+    }
   },
 
   /**
