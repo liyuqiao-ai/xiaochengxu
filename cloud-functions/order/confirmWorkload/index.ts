@@ -66,22 +66,25 @@ export const main = async (event: any) => {
     // 验证订单访问权限
     const accessResult = await validateOrderAccess(context!.userId, orderId);
     if (!accessResult.success) {
-      return { success: false, error: accessResult.error || '无权操作此订单' };
+      return createErrorResponse(ErrorCode.ORDER_NOT_FOUND, accessResult.error || '无权操作此订单');
     }
 
     const order = accessResult.order;
 
     // 验证订单状态
     if (order.status !== 'in_progress') {
-      return { success: false, error: `订单状态为 ${order.status}，无法确认工作量。只有进行中的订单可以确认工作量。` };
+      return createErrorResponse(
+        ErrorCode.ORDER_STATUS_INVALID,
+        `订单状态为 ${order.status}，无法确认工作量。只有进行中的订单可以确认工作量。`
+      );
     }
 
     // 验证确认方身份
     if (confirmedBy === 'farmer' && order.farmerId !== context!.userId) {
-      return { success: false, error: '只有订单的农户可以确认工作量' };
+      return createErrorResponse(ErrorCode.USER_NOT_AUTHORIZED, '只有订单的农户可以确认工作量');
     }
     if (confirmedBy === 'contractor' && order.contractorId !== context!.userId) {
-      return { success: false, error: '只有订单的工头可以确认工作量' };
+      return createErrorResponse(ErrorCode.USER_NOT_AUTHORIZED, '只有订单的工头可以确认工作量');
     }
 
     // 3. 使用乐观锁原子性更新订单
