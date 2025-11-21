@@ -7,11 +7,28 @@ import { JobType, PricingMode } from '../../../../shared/types/order';
 Page({
   data: {
     jobType: 'harvest' as JobType,
+    jobTypeIndex: 0,
+    jobTypes: [
+      { value: 'harvest', name: '收割' },
+      { value: 'plant', name: '种植' },
+      { value: 'fertilize', name: '施肥' },
+      { value: 'pesticide', name: '打药' },
+      { value: 'weeding', name: '除草' },
+      { value: 'management', name: '管理' },
+    ],
     pricingMode: 'piece' as PricingMode,
+    pricingModeIndex: 0,
+    pricingModes: [
+      { value: 'piece', name: '记件' },
+      { value: 'daily', name: '按天' },
+      { value: 'monthly', name: '包月' },
+    ],
+    unit: 'acre',
+    unitIndex: 0,
+    units: ['亩', '斤', '车'],
     location: null as any,
     formData: {
       // 记件模式
-      unit: 'acre',
       estimatedQuantity: 0,
       // 按天模式
       estimatedWorkers: 1,
@@ -89,8 +106,10 @@ Page({
    * 选择工种
    */
   onJobTypeChange(e: any) {
+    const index = parseInt(e.detail.value);
     this.setData({
-      jobType: e.detail.value,
+      jobTypeIndex: index,
+      jobType: this.data.jobTypes[index].value as JobType,
     });
   },
 
@@ -98,8 +117,90 @@ Page({
    * 选择计价模式
    */
   onPricingModeChange(e: any) {
+    const index = parseInt(e.detail.value);
     this.setData({
-      pricingMode: e.detail.value,
+      pricingModeIndex: index,
+      pricingMode: this.data.pricingModes[index].value as PricingMode,
+    });
+  },
+
+  /**
+   * 选择单位
+   */
+  onUnitChange(e: any) {
+    const index = parseInt(e.detail.value);
+    const unitMap: Record<string, string> = {
+      0: 'acre', // 亩
+      1: 'jin',  // 斤
+      2: 'cart', // 车
+    };
+    this.setData({
+      unitIndex: index,
+      unit: unitMap[index] || 'acre',
+    });
+  },
+
+  /**
+   * 输入数量
+   */
+  onQuantityInput(e: any) {
+    const value = parseFloat(e.detail.value) || 0;
+    this.setData({
+      'formData.estimatedQuantity': value,
+    });
+  },
+
+  /**
+   * 输入用工人数
+   */
+  onWorkersInput(e: any) {
+    const value = parseInt(e.detail.value) || 1;
+    this.setData({
+      'formData.estimatedWorkers': value,
+    });
+  },
+
+  /**
+   * 输入天数
+   */
+  onDaysInput(e: any) {
+    const value = parseInt(e.detail.value) || 1;
+    this.setData({
+      'formData.estimatedDays': value,
+    });
+  },
+
+  /**
+   * 输入月数
+   */
+  onMonthsInput(e: any) {
+    const value = parseInt(e.detail.value) || 1;
+    this.setData({
+      'formData.estimatedMonths': value,
+    });
+  },
+
+  /**
+   * 选择地点
+   */
+  selectLocation() {
+    // 可以打开地图选择地点
+    wx.chooseLocation({
+      success: (res) => {
+        this.setData({
+          location: {
+            lat: res.latitude,
+            lng: res.longitude,
+            address: res.address || res.name,
+          },
+        });
+      },
+      fail: () => {
+        wx.showToast({
+          title: '选择地点失败',
+          icon: 'none',
+        });
+      },
     });
   },
 
@@ -180,7 +281,7 @@ Page({
         return {
           ...baseData,
           pieceInfo: {
-            unit: this.data.formData.unit,
+            unit: this.data.unit,
             estimatedQuantity: this.data.formData.estimatedQuantity,
           },
         };

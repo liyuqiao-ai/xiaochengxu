@@ -40,10 +40,25 @@ input {
   color: #333;
 }
 
-.location-text {
+.location-wrapper {
   flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.location-text {
   font-size: 32rpx;
   color: #666;
+  margin-right: 10rpx;
+  max-width: 400rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.location-icon {
+  font-size: 32rpx;
 }
 
 .submit-section {
