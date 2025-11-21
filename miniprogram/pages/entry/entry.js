@@ -1,66 +1,99 @@
 // pages/entry/entry.js
 Page({
-
   /**
    * 页面的初始数据
    */
   data: {
-
+    userInfo: null,
   },
 
   /**
    * 生命周期函数--监听页面加载
    */
   onLoad(options) {
-
+    this.loadUserInfo();
   },
 
   /**
-   * 生命周期函数--监听页面初次渲染完成
+   * 加载用户信息
    */
-  onReady() {
-
+  loadUserInfo() {
+    const userInfo = wx.getStorageSync('userInfo');
+    if (userInfo) {
+      this.setData({ userInfo });
+      // 如果已有角色，直接跳转
+      this.redirectToRole(userInfo.role);
+    }
   },
 
   /**
-   * 生命周期函数--监听页面显示
+   * 选择角色
    */
-  onShow() {
+  selectRole(e) {
+    const role = e.currentTarget.dataset.role;
+    const userInfo = this.data.userInfo;
 
+    if (!userInfo) {
+      // 未登录，先登录
+      wx.reLaunch({
+        url: '/pages/login/login',
+      });
+      return;
+    }
+
+    // 更新用户角色（如果需要）
+    if (userInfo.role !== role) {
+      // 可以调用云函数更新角色
+      // 这里暂时直接跳转
+    }
+
+    this.redirectToRole(role);
   },
 
   /**
-   * 生命周期函数--监听页面隐藏
+   * 根据角色跳转
+   * 严格按照要求：严格跳转到对应subPackage首页
    */
-  onHide() {
+  redirectToRole(role) {
+    // 严格按照多subPackages架构跳转
+    const roleRoutes = {
+      farmer: '/farmer/pages/index/index',
+      contractor: '/contractor/pages/index/index',
+      worker: '/worker/pages/index/index',
+      introducer: '/introducer/pages/index/index',
+    };
 
+    const route = roleRoutes[role];
+    if (!route) {
+      wx.showToast({
+        title: '无效的角色',
+        icon: 'none',
+      });
+      return;
+    }
+
+    // 使用reLaunch确保完全跳转到subPackage
+    wx.reLaunch({
+      url: route,
+      fail: (err) => {
+        console.error('跳转失败:', err);
+        wx.showToast({
+          title: '跳转失败，请重试',
+          icon: 'none',
+        });
+      },
+    });
   },
 
   /**
-   * 生命周期函数--监听页面卸载
+   * 去登录
    */
-  onUnload() {
-
+  goToLogin() {
+    // 登录功能将在后续版本实现
+    wx.showModal({
+      title: '提示',
+      content: '请先选择角色，登录功能将在后续版本实现',
+      showCancel: false,
+    });
   },
-
-  /**
-   * 页面相关事件处理函数--监听用户下拉动作
-   */
-  onPullDownRefresh() {
-
-  },
-
-  /**
-   * 页面上拉触底事件的处理函数
-   */
-  onReachBottom() {
-
-  },
-
-  /**
-   * 用户点击右上角分享
-   */
-  onShareAppMessage() {
-
-  }
-})
+});
