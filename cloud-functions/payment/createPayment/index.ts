@@ -11,6 +11,7 @@ import {
   ErrorCode,
 } from '../../../shared/utils/errors';
 import { authMiddleware } from '../../../shared/middleware/auth';
+import { PricingEngine } from '../../../shared/utils/pricing';
 
 cloud.init({
   env: cloud.DYNAMIC_CURRENT_ENV,
@@ -51,6 +52,19 @@ function generateSign(params: Record<string, any>, key: string): string {
 }
 
 /**
+ * 解析XML响应
+ */
+function parseXML(xml: string): Record<string, any> {
+  const result: Record<string, any> = {};
+  const regex = /<(\w+)>(.*?)<\/\1>/g;
+  let match;
+  while ((match = regex.exec(xml)) !== null) {
+    result[match[1]] = match[2];
+  }
+  return result;
+}
+
+/**
  * 调用微信支付统一下单API
  */
 async function unifiedOrder(params: {
@@ -70,25 +84,21 @@ async function unifiedOrder(params: {
   const sign = generateSign(params, params.key);
 
   // 构建XML请求
-  const xml = `
-    <xml>
-      <appid>${params.appid}</appid>
-      <mch_id>${params.mch_id}</mch_id>
-      <nonce_str>${params.nonce_str}</nonce_str>
-      <body>${params.body}</body>
-      <out_trade_no>${params.out_trade_no}</out_trade_no>
-      <total_fee>${params.total_fee}</total_fee>
-      <spbill_create_ip>${params.spbill_create_ip}</spbill_create_ip>
-      <notify_url>${params.notify_url}</notify_url>
-      <trade_type>${params.trade_type}</trade_type>
-      <openid>${params.openid}</openid>
-      <sign>${sign}</sign>
-    </xml>
-  `;
+  const xml = `<xml>
+<appid>${params.appid}</appid>
+<mch_id>${params.mch_id}</mch_id>
+<nonce_str>${params.nonce_str}</nonce_str>
+<body><![CDATA[${params.body}]]></body>
+<out_trade_no>${params.out_trade_no}</out_trade_no>
+<total_fee>${params.total_fee}</total_fee>
+<spbill_create_ip>${params.spbill_create_ip}</spbill_create_ip>
+<notify_url>${params.notify_url}</notify_url>
+<trade_type>${params.trade_type}</trade_type>
+<openid>${params.openid}</openid>
+<sign>${sign}</sign>
+</xml>`;
 
   // 调用微信支付API
-  // 注意：实际环境中需要使用HTTPS请求
-  // 这里使用云函数调用HTTP API
   const https = require('https');
   return new Promise((resolve, reject) => {
     const options = {
@@ -107,9 +117,16 @@ async function unifiedOrder(params: {
         data += chunk;
       });
       res.on('end', () => {
-        // 解析XML响应
-        // TODO: 使用XML解析库解析响应
-        resolve(data);
+        try {
+          const parsed = parseXML(data);
+          if (parsed.return_code === 'SUCCESS' && parsed.result_code === 'SUCCESS') {
+            resolve(parsed);
+          } else {
+            reject(new Error(parsed.err_code_des || parsed.return_msg || '统一下单失败'));
+          }
+        } catch (error) {
+          reject(new Error('解析响应失败'));
+        }
       });
     });
 
@@ -148,16 +165,21 @@ export const main = async (event: any) => {
       return createErrorResponse(ErrorCode.USER_NOT_AUTHORIZED, '无权支付此订单');
     }
 
-    if (order.status !== 'confirmed' && order.status !== 'in_progress') {
+    if (order.status !== 'completed') {
       return createErrorResponse(
         ErrorCode.ORDER_STATUS_INVALID,
-        '订单状态不允许支付'
+        '订单状态不允许支付，请先完成订单'
       );
+    }
+
+    // 检查是否已支付
+    const existingPayments = await db.queryDocs('payments', { orderId, status: 'paid' });
+    if (existingPayments.length > 0) {
+      return createErrorResponse(ErrorCode.PAYMENT_FAILED, '订单已支付');
     }
 
     // 5. 计算支付金额（如果还没有计算）
     if (!order.financials) {
-      const { PricingEngine } = require('../../../shared/utils/pricing');
       const payment = PricingEngine.calculateOrderPayment(order);
       await db.updateDoc('orders', orderId, { financials: payment });
       order.financials = payment;
@@ -167,24 +189,31 @@ export const main = async (event: any) => {
     const outTradeNo = `ORDER_${orderId}_${Date.now()}`;
     const nonceStr = generateNonceStr();
 
-    // 7. 调用微信支付统一下单
-    // 支付回调地址：需要在微信支付商户平台配置
-    // 格式：https://你的云环境ID.service.weixin.qq.com/payment/payCallback
-    // 或者使用云函数的HTTP触发地址
+    // 7. 获取微信支付配置
     const wxPayConfig = {
       appid: 'wxbc618555fee468d1',
       mch_id: process.env.WX_PAY_MCHID || '',
       key: process.env.WX_PAY_KEY || '',
-      notify_url: process.env.CLOUD_BASE_URL || `https://cloud1-3g2i1jqra6ba039d.service.weixin.qq.com/payment/payCallback`,
+      notify_url:
+        process.env.CLOUD_BASE_URL ||
+        `https://cloud1-3g2i1jqra6ba039d.service.weixin.qq.com/payment/payCallback`,
     };
 
+    if (!wxPayConfig.mch_id || !wxPayConfig.key) {
+      return createErrorResponse(
+        ErrorCode.PAYMENT_FAILED,
+        '微信支付配置不完整，请联系管理员'
+      );
+    }
+
+    // 8. 调用微信支付统一下单
     const unifiedOrderResult = await unifiedOrder({
       appid: wxPayConfig.appid,
       mch_id: wxPayConfig.mch_id,
       nonce_str: nonceStr,
       body: `农业零工-${order.jobType}`,
       out_trade_no: outTradeNo,
-      total_fee: order.financials.totalAmount,
+      total_fee: order.financials.totalAmount, // 金额单位：分
       spbill_create_ip: '127.0.0.1', // 实际应从请求中获取
       notify_url: wxPayConfig.notify_url,
       trade_type: 'JSAPI',
@@ -192,7 +221,7 @@ export const main = async (event: any) => {
       key: wxPayConfig.key,
     });
 
-    // 8. 保存支付记录
+    // 9. 保存支付记录
     const paymentId = await db.addDoc('payments', {
       orderId,
       outTradeNo,
@@ -201,20 +230,21 @@ export const main = async (event: any) => {
       createdAt: new Date(),
     });
 
-    // 9. 返回支付参数（小程序端需要）
-    // 实际应该解析unifiedOrderResult获取prepay_id
-    // 然后生成小程序支付参数
+    // 10. 生成小程序支付参数
+    const timeStamp = Math.floor(Date.now() / 1000).toString();
+    const prepayId = unifiedOrderResult.prepay_id;
+
     const paymentParams = {
-      timeStamp: Math.floor(Date.now() / 1000).toString(),
+      timeStamp,
       nonceStr: nonceStr,
-      package: `prepay_id=${unifiedOrderResult.prepay_id || 'mock_prepay_id'}`,
-      signType: 'MD5',
+      package: `prepay_id=${prepayId}`,
+      signType: 'MD5' as const,
       paySign: generateSign(
         {
           appId: wxPayConfig.appid,
-          timeStamp: Math.floor(Date.now() / 1000).toString(),
+          timeStamp,
           nonceStr: nonceStr,
-          package: `prepay_id=${unifiedOrderResult.prepay_id || 'mock_prepay_id'}`,
+          package: `prepay_id=${prepayId}`,
           signType: 'MD5',
         },
         wxPayConfig.key
@@ -230,4 +260,3 @@ export const main = async (event: any) => {
     return createErrorResponse(ErrorCode.PAYMENT_FAILED, undefined, error.message);
   }
 };
-
