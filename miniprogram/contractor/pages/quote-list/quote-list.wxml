@@ -1,0 +1,49 @@
+<view class="container">
+  <!-- 标签页 -->
+  <view class="tabs">
+    <view
+      class="tab-item {{activeTab === index ? 'active' : ''}}"
+      wx:for="{{tabs}}"
+      wx:key="index"
+      wx:for-index="index"
+      bindtap="onTabChange"
+      data-index="{{index}}"
+    >
+      {{item}}
+    </view>
+  </view>
+
+  <!-- 报价列表 -->
+  <view class="quote-list">
+    <view
+      class="quote-item"
+      wx:for="{{quotes}}"
+      wx:key="_id"
+      bindtap="viewOrderDetail"
+      data-order-id="{{item._id}}"
+    >
+      <view class="quote-header">
+        <text class="quote-job">{{item.jobType}}</text>
+        <text class="quote-status {{item.status}}">{{getStatusText(item.status)}}</text>
+      </view>
+      <view class="quote-info">
+        <text class="quote-location">{{item.location.address}}</text>
+        <text class="quote-time">{{formatDate(item.timeline.createdAt)}}</text>
+      </view>
+      <view class="quote-actions" wx:if="{{item.status === 'pending'}}">
+        <button
+          class="btn-quote"
+          size="mini"
+          catchtap="submitQuote"
+          data-order-id="{{item._id}}"
+        >
+          立即报价
+        </button>
+      </view>
+    </view>
+    <view class="empty" wx:if="{{quotes.length === 0 && !loading}}">
+      暂无报价
+    </view>
+  </view>
+</view>
+

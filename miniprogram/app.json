@@ -6,6 +6,7 @@
     "contractor/pages/order-detail/order-detail",
     "contractor/pages/submit-quote/submit-quote",
     "contractor/pages/quote/quote",
+    "contractor/pages/quote-list/quote-list",
     "contractor/pages/team/team",
     "farmer/pages/order-detail/order-detail",
     "farmer/pages/quotes/quotes",
