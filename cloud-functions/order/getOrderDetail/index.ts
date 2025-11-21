@@ -10,7 +10,7 @@ import {
   createInvalidParamsResponse,
   ErrorCode,
 } from '../../../shared/utils/errors';
-import { authMiddleware } from '../../../shared/middleware/auth';
+import { authMiddleware, validateOrderAccess } from '../../../shared/middleware/auth';
 
 cloud.init({
   env: cloud.DYNAMIC_CURRENT_ENV,
@@ -42,12 +42,10 @@ export const main = async (event: any) => {
       return createErrorResponse(ErrorCode.ORDER_NOT_FOUND);
     }
 
-    // 4. 权限检查：只有订单相关的用户才能查看
-    const isFarmer = context!.userId === order.farmerId;
-    const isContractor = context!.userId === order.contractorId;
-
-    if (!isFarmer && !isContractor) {
-      return createErrorResponse(ErrorCode.USER_NOT_AUTHORIZED, '无权查看此订单');
+    // 4. 权限检查：使用统一的权限验证函数
+    const accessResult = await validateOrderAccess(context!.userId, orderId);
+    if (!accessResult.success) {
+      return createErrorResponse(ErrorCode.USER_NOT_AUTHORIZED, accessResult.error);
     }
 
     return createSuccessResponse({ order });

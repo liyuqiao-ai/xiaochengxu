@@ -1,0 +1,10 @@
+{
+  "name": "startWork",
+  "version": "1.0.0",
+  "description": "开始工作云函数",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "^2.6.3"
+  }
+}
+

@@ -45,7 +45,7 @@ export const main = async (event: any) => {
     // 2. 获取订单
     const order = await db.getDoc('orders', orderId);
     if (!order) {
-      return createErrorResponse(ErrorCode.ORDER_NOT_FOUND);
+      return { success: false, error: '订单不存在' };
     }
 
     // 3. 更新实际工作量
@@ -103,10 +103,10 @@ export const main = async (event: any) => {
     // 6. 更新订单
     await db.updateDoc('orders', orderId, updateData);
 
-    return createSuccessResponse({ bothConfirmed });
+    return { success: true, bothConfirmed };
   } catch (error: any) {
     console.error('确认工作量失败:', error);
-    return createErrorResponse(ErrorCode.UNKNOWN_ERROR, undefined, error.message);
+    return { success: false, error: error.message || '确认工作量失败' };
   }
 };
 
