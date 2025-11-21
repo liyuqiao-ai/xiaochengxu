@@ -1,0 +1,52 @@
+<view class="container">
+  <view class="section">
+    <view class="label">当前进度</view>
+    <input
+      type="digit"
+      value="{{progress}}"
+      placeholder="请输入进度(0-100)"
+      bindinput="onProgressInput"
+      class="input"
+    />
+    <view class="progress-bar">
+      <view class="progress-fill" style="width: {{progress}}%"></view>
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="label">工作描述</view>
+    <textarea
+      value="{{description}}"
+      placeholder="请描述当前工作进展..."
+      bindinput="onDescriptionInput"
+      class="textarea"
+      maxlength="500"
+    />
+  </view>
+
+  <view class="section">
+    <view class="label">工作照片</view>
+    <view class="images">
+      <view
+        class="image-item"
+        wx:for="{{images}}"
+        wx:key="index"
+      >
+        <image src="{{item}}" mode="aspectFill" />
+        <view class="delete-btn" bindtap="deleteImage" data-index="{{index}}">×</view>
+      </view>
+      <view
+        class="image-item add-image"
+        wx:if="{{images.length < 9}}"
+        bindtap="chooseImage"
+      >
+        <text>+</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="submit-btn" bindtap="submitUpdate">
+    <text>提交更新</text>
+  </view>
+</view>
+

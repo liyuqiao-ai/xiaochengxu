@@ -85,9 +85,22 @@ Page({
     }
 
     try {
+      // 获取用户信息
+      const userInfo = wx.getStorageSync('userInfo');
+      if (!userInfo || userInfo.role !== 'farmer') {
+        wx.showToast({
+          title: '只有农户可以发布需求',
+          icon: 'none',
+        });
+        return;
+      }
+
       const result = await wx.cloud.callFunction({
         name: 'createOrder',
-        data: demandData,
+        data: {
+          ...demandData,
+          farmerId: userInfo._id,
+        },
       });
 
       if (result.result.success) {

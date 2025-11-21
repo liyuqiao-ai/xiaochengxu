@@ -87,6 +87,120 @@ Page({
   },
 
   /**
+   * 开始工作
+   */
+  async startWork() {
+    try {
+      wx.showLoading({ title: '处理中...' });
+
+      const result = await wx.cloud.callFunction({
+        name: 'startWork',
+        data: {
+          orderId: this.data.orderId,
+        },
+      });
+
+      wx.hideLoading();
+
+      if (result.result.success) {
+        wx.showToast({
+          title: '已开始工作',
+          icon: 'success',
+        });
+        this.loadOrderDetail();
+      } else {
+        wx.showToast({
+          title: result.result.error || '操作失败',
+          icon: 'none',
+        });
+      }
+    } catch (error) {
+      wx.hideLoading();
+      console.error('开始工作失败:', error);
+      wx.showToast({
+        title: '操作失败',
+        icon: 'none',
+      });
+    }
+  },
+
+  /**
+   * 更新进度
+   */
+  updateProgress() {
+    wx.navigateTo({
+      url: `/pages/contractor/update-progress/update-progress?orderId=${this.data.orderId}`,
+    });
+  },
+
+  /**
+   * 确认工作量
+   */
+  async confirmWorkload() {
+    wx.showModal({
+      title: '确认工作量',
+      content: '请填写实际工作量',
+      editable: true,
+      placeholderText: '请输入实际工作量',
+      success: async (res) => {
+        if (res.confirm) {
+          try {
+            wx.showLoading({ title: '处理中...' });
+
+            // 解析工作量数据（这里简化处理，实际应该根据计价模式输入不同字段）
+            const order = this.data.order;
+            const actualWorkload: any = {
+              overtimeHours: 0,
+            };
+
+            // 根据计价模式设置工作量
+            if (order.pricingMode === 'piece') {
+              actualWorkload.quantity = parseFloat(res.content) || order.pieceInfo?.estimatedQuantity;
+            } else if (order.pricingMode === 'daily') {
+              actualWorkload.days = parseFloat(res.content) || order.dailyInfo?.estimatedDays;
+              actualWorkload.workers = order.dailyInfo?.estimatedWorkers;
+            } else if (order.pricingMode === 'monthly') {
+              actualWorkload.months = parseFloat(res.content) || order.monthlyInfo?.estimatedMonths;
+              actualWorkload.workers = order.monthlyInfo?.estimatedWorkers;
+            }
+
+            const result = await wx.cloud.callFunction({
+              name: 'confirmWorkload',
+              data: {
+                orderId: this.data.orderId,
+                actualWorkload,
+                confirmedBy: 'contractor',
+              },
+            });
+
+            wx.hideLoading();
+
+            if (result.result.success) {
+              wx.showToast({
+                title: '确认成功',
+                icon: 'success',
+              });
+              this.loadOrderDetail();
+            } else {
+              wx.showToast({
+                title: result.result.error || '确认失败',
+                icon: 'none',
+              });
+            }
+          } catch (error) {
+            wx.hideLoading();
+            console.error('确认工作量失败:', error);
+            wx.showToast({
+              title: '确认失败',
+              icon: 'none',
+            });
+          }
+        }
+      },
+    });
+  },
+
+  /**
    * 格式化金额（分转元）
    */
   formatAmount(fen: number): string {

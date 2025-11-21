@@ -149,6 +149,64 @@ Page({
   },
 
   /**
+   * 确认工作量
+   */
+  async confirmWorkload() {
+    wx.showModal({
+      title: '确认工作量',
+      content: '请确认实际工作量是否与工头提交的一致',
+      success: async (res) => {
+        if (res.confirm) {
+          try {
+            wx.showLoading({ title: '处理中...' });
+
+            // 获取订单的实际工作量（从订单中获取）
+            const order = this.data.order;
+            if (!order || !order.actualWorkload) {
+              wx.showToast({
+                title: '请先等待工头提交工作量',
+                icon: 'none',
+              });
+              return;
+            }
+
+            const result = await wx.cloud.callFunction({
+              name: 'confirmWorkload',
+              data: {
+                orderId: this.data.orderId,
+                actualWorkload: order.actualWorkload,
+                confirmedBy: 'farmer',
+              },
+            });
+
+            wx.hideLoading();
+
+            if (result.result.success) {
+              wx.showToast({
+                title: '确认成功',
+                icon: 'success',
+              });
+              this.loadOrderDetail();
+            } else {
+              wx.showToast({
+                title: result.result.error || '确认失败',
+                icon: 'none',
+              });
+            }
+          } catch (error) {
+            wx.hideLoading();
+            console.error('确认工作量失败:', error);
+            wx.showToast({
+              title: '确认失败',
+              icon: 'none',
+            });
+          }
+        }
+      },
+    });
+  },
+
+  /**
    * 开始工作
    */
   async startWork() {
@@ -156,10 +214,9 @@ Page({
       wx.showLoading({ title: '处理中...' });
 
       const result = await wx.cloud.callFunction({
-        name: 'updateOrderStatus',
+        name: 'startWork',
         data: {
           orderId: this.data.orderId,
-          targetStatus: 'in_progress',
         },
       });
 

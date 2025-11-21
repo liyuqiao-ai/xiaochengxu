@@ -25,7 +25,8 @@
         "pages/submit-quote/submit-quote",
         "pages/quote/quote",
         "pages/quote-list/quote-list",
-        "pages/team/team"
+        "pages/team/team",
+        "pages/update-progress/update-progress"
       ]
     },
     {
