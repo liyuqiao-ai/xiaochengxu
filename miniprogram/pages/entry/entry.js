@@ -67,11 +67,21 @@ Page({
       return;
     }
 
-    // 更新用户角色（如果需要）
-    if (userInfo.role !== role) {
-      console.log('更新用户角色:', userInfo.role, '->', role);
-      // 可以调用云函数更新角色
-      // 这里暂时直接跳转
+    // 已登录，验证角色匹配
+    if (userInfo.role && userInfo.role !== role) {
+      const roleNames = {
+        farmer: '农户',
+        contractor: '工头',
+        worker: '工人',
+        introducer: '介绍方',
+      };
+      wx.showModal({
+        title: '提示',
+        content: `您的角色是${roleNames[userInfo.role] || userInfo.role}，无法进入${roleNames[role] || role}端`,
+        showCancel: false,
+        confirmText: '确定',
+      });
+      return;
     }
 
     this.redirectToRole(role);

@@ -8,6 +8,22 @@
     </view>
   </view>
 
+  <!-- 数据统计卡片 -->
+  <view class="stats-cards">
+    <view class="stat-card" bindtap="viewPendingQuotes">
+      <text class="stat-number">{{stats.pendingQuotes || 0}}</text>
+      <text class="stat-label">待处理报价</text>
+    </view>
+    <view class="stat-card" bindtap="viewAllOrders">
+      <text class="stat-number">{{stats.activeOrders || 0}}</text>
+      <text class="stat-label">进行中订单</text>
+    </view>
+    <view class="stat-card" bindtap="viewAllOrders">
+      <text class="stat-number">{{stats.completedOrders || 0}}</text>
+      <text class="stat-label">已完成订单</text>
+    </view>
+  </view>
+
   <!-- 快捷操作 -->
   <view class="quick-actions">
     <view class="action-item" bindtap="publishDemand">
@@ -43,6 +59,9 @@
         </view>
         <view class="order-info">
           <text class="order-location">📍 {{item.location.address}}</text>
+          <text class="order-price" wx:if="{{item.financials}}">
+            {{item.financials.totalAmount / 100}} 元
+          </text>
         </view>
         <view class="order-time">
           <text>{{item.timeline.createdAt}}</text>
@@ -73,6 +92,9 @@
         </view>
         <view class="order-info">
           <text class="order-location">📍 {{item.location.address}}</text>
+          <text class="order-price" wx:if="{{item.financials}}">
+            {{item.financials.totalAmount / 100}} 元
+          </text>
         </view>
         <view class="order-time">
           <text>{{item.timeline.startedAt || item.timeline.confirmedAt}}</text>

@@ -7,6 +7,8 @@ Page({
     taskId: '',
     task: null as any,
     loading: false,
+    hasApplied: false, // 是否已申请
+    applicationStatus: '', // 申请状态: pending, approved, rejected
   },
 
   onLoad(options: any) {
@@ -50,6 +52,17 @@ Page({
         loading: false,
       });
 
+      // 检查申请状态（如果任务有工头）
+      if (task && task.contractorId) {
+        await this.checkApplicationStatus();
+      } else {
+        // 如果没有工头，重置申请状态
+        this.setData({
+          hasApplied: false,
+          applicationStatus: '',
+        });
+      }
+
       wx.hideLoading();
     } catch (error) {
       wx.hideLoading();
@@ -62,62 +75,12 @@ Page({
     }
   },
 
-  /**
-   * 加入团队
-   */
-  async joinTeam() {
-    const { task } = this.data;
-    if (!task || !task.contractorId) {
-      wx.showToast({
-        title: '任务信息不完整',
-        icon: 'none',
-      });
-      return;
-    }
-
-    wx.showModal({
-      title: '确认加入',
-      content: '确定要加入此工头的团队吗？',
-      success: async (res) => {
-        if (res.confirm) {
-          try {
-            wx.showLoading({ title: '处理中...' });
-
-            const result = await wx.cloud.callFunction({
-              name: 'joinTeam',
-              data: {
-                contractorId: task.contractorId,
-                orderId: task._id,
-              },
-            });
-
-            wx.hideLoading();
-
-            if (result.result.success) {
-              wx.showToast({
-                title: '申请已提交',
-                icon: 'success',
-              });
-              setTimeout(() => {
-                wx.navigateBack();
-              }, 1500);
-            } else {
-              wx.showToast({
-                title: result.result.error || '申请失败',
-                icon: 'none',
-              });
-            }
-          } catch (error) {
-            wx.hideLoading();
-            console.error('加入团队失败:', error);
-            wx.showToast({
-              title: '申请失败',
-              icon: 'none',
-            });
-          }
-        }
-      },
-    });
+  data: {
+    taskId: '',
+    task: null as any,
+    loading: false,
+    hasApplied: false, // 是否已申请
+    applicationStatus: '', // 申请状态
   },
 
   /**

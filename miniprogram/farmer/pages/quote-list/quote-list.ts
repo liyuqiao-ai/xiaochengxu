@@ -103,6 +103,15 @@ Page({
   async acceptQuote(e: any) {
     const contractorId = e.currentTarget.dataset.contractorId;
     const orderId = this.data.orderId;
+    const userInfo = wx.getStorageSync('userInfo');
+
+    if (!userInfo) {
+      wx.showToast({
+        title: '请先登录',
+        icon: 'none',
+      });
+      return;
+    }
 
     wx.showModal({
       title: '确认接受',
@@ -114,7 +123,11 @@ Page({
 
             const result = await wx.cloud.callFunction({
               name: 'acceptQuote',
-              data: { orderId },
+              data: {
+                orderId,
+                contractorId,
+                farmerId: userInfo._id,
+              },
             });
 
             wx.hideLoading();
@@ -124,8 +137,13 @@ Page({
                 title: '接受成功',
                 icon: 'success',
               });
+              // 刷新数据
+              this.loadData();
+              // 跳转到订单详情页
               setTimeout(() => {
-                wx.navigateBack();
+                wx.navigateTo({
+                  url: `/farmer/pages/order-detail/order-detail?orderId=${orderId}`,
+                });
               }, 1500);
             } else {
               wx.showToast({

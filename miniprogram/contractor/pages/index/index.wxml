@@ -23,6 +23,10 @@
       <text class="stat-value">{{stats.teamSize}}</text>
       <text class="stat-label">团队成员</text>
     </view>
+    <view class="stat-item">
+      <text class="stat-value">{{(stats.totalIncome / 100).toFixed(0)}}</text>
+      <text class="stat-label">总收入(元)</text>
+    </view>
   </view>
 
   <!-- 快捷操作 -->

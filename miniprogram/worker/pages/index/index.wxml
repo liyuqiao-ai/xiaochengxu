@@ -6,9 +6,21 @@
     </view>
   </view>
 
+  <!-- 数据统计 -->
+  <view class="stats-section">
+    <view class="stat-item">
+      <text class="stat-value">{{stats.nearbyTasksCount || 0}}</text>
+      <text class="stat-label">附近任务</text>
+    </view>
+    <view class="stat-item">
+      <text class="stat-value">{{stats.myTasksCount || 0}}</text>
+      <text class="stat-label">我的任务</text>
+    </view>
+  </view>
+
   <!-- 附近任务 -->
   <view class="section">
-    <view class="section-title">附近任务</view>
+    <view class="section-title">附近任务 ({{nearbyTasks.length}})</view>
     <view class="task-list">
       <view
         class="task-item"
@@ -22,7 +34,15 @@
           <text class="task-status">{{item.status}}</text>
         </view>
         <view class="task-info">
-          <text class="task-location">{{item.location.address}}</text>
+          <text class="task-location">📍 {{item.location.address}}</text>
+          <text class="task-distance" wx:if="{{item.distance}}">{{item.distance}}km</text>
+        </view>
+        <view class="task-salary" wx:if="{{item.dailyInfo || item.pieceInfo}}">
+          <text class="salary-label">薪资：</text>
+          <text class="salary-value">
+            <text wx:if="{{item.pricingMode === 'daily'}}">{{item.dailyInfo.dailySalary / 100}} 元/天</text>
+            <text wx:if="{{item.pricingMode === 'piece'}}">{{item.pieceInfo.unitPrice / 100}} 元/{{item.pieceInfo.unit}}</text>
+          </text>
         </view>
         <view class="task-actions">
           <button class="btn-join" size="mini" catchtap="joinTeam" data-contractor-id="{{item.contractorId}}">

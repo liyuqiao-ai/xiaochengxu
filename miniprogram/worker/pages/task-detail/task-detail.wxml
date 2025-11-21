@@ -69,8 +69,25 @@
   </view>
 
   <!-- 操作按钮 -->
-  <view class="action-section" wx:if="{{task && task.status === 'in_progress' && !task.contractorId}}">
-    <button class="action-btn primary" bindtap="joinTeam">加入团队</button>
+  <view class="action-section" wx:if="{{task && task.contractorId}}">
+    <button 
+      class="action-btn primary" 
+      bindtap="joinTeam"
+      wx:if="{{!hasApplied || applicationStatus === 'rejected'}}"
+      disabled="{{hasApplied && applicationStatus === 'pending'}}"
+    >
+      {{hasApplied && applicationStatus === 'pending' ? '申请审核中...' : '申请加入团队'}}
+    </button>
+    <view class="status-info" wx:if="{{hasApplied && applicationStatus === 'approved'}}">
+      <text class="status-text">✓ 您已是团队成员</text>
+    </view>
+    <view class="status-info" wx:if="{{hasApplied && applicationStatus === 'pending'}}">
+      <text class="status-text">⏳ 申请审核中，请等待工头审核</text>
+    </view>
+    <view class="status-info" wx:if="{{hasApplied && applicationStatus === 'rejected'}}">
+      <text class="status-text">✗ 申请已被拒绝，可重新申请</text>
+    </view>
+    <button class="action-btn secondary" bindtap="contactContractor">联系工头</button>
   </view>
 </view>
 

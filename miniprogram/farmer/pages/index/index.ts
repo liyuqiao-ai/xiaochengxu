@@ -8,10 +8,40 @@ Page({
     pendingQuotes: 0, // 待处理报价数量
     inProgressOrders: [] as any[],
     pendingOrders: [] as any[],
+    stats: {
+      totalOrders: 0,
+      pendingQuotes: 0,
+      activeOrders: 0,
+      completedOrders: 0,
+    },
     loading: false,
   },
 
   onLoad() {
+    // 先检查登录状态和角色权限
+    const userInfo = wx.getStorageSync('userInfo');
+    if (!userInfo) {
+      wx.reLaunch({
+        url: '/pages/login/login',
+      });
+      return;
+    }
+
+    // 验证角色权限
+    if (userInfo.role !== 'farmer') {
+      wx.showModal({
+        title: '提示',
+        content: '您不是农户，无法访问此页面',
+        showCancel: false,
+        success: () => {
+          wx.reLaunch({
+            url: '/pages/entry/entry',
+          });
+        },
+      });
+      return;
+    }
+
     this.loadUserInfo();
     this.loadData();
   },
@@ -78,10 +108,21 @@ Page({
           (o: any) => o.status === 'quoted'
         ).length;
 
+        // 统计已完成订单
+        const completedOrders = orders.filter(
+          (o: any) => o.status === 'completed'
+        ).length;
+
         this.setData({
           pendingOrders,
           inProgressOrders,
           pendingQuotes,
+          stats: {
+            totalOrders: orders.length,
+            pendingQuotes,
+            activeOrders: inProgressOrders.length,
+            completedOrders,
+          },
           loading: false,
         });
       } else {

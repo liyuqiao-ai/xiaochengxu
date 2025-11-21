@@ -9,12 +9,37 @@ Page({
       pendingQuotesCount: 0,
       inProgressCount: 0,
       teamSize: 0,
+      totalIncome: 0, // 总收入
     },
     pendingQuotes: [] as any[],
     myOrders: [] as any[],
   },
 
   onLoad() {
+    // 先检查登录状态和角色权限
+    const userInfo = wx.getStorageSync('userInfo');
+    if (!userInfo) {
+      wx.reLaunch({
+        url: '/pages/login/login',
+      });
+      return;
+    }
+
+    // 验证角色权限
+    if (userInfo.role !== 'contractor') {
+      wx.showModal({
+        title: '提示',
+        content: '您不是工头，无法访问此页面',
+        showCancel: false,
+        success: () => {
+          wx.reLaunch({
+            url: '/pages/entry/entry',
+          });
+        },
+      });
+      return;
+    }
+
     this.loadUserInfo();
     this.loadOrders();
   },
@@ -82,14 +107,22 @@ Page({
         const inProgressOrders = myOrders.filter(
           (o: any) => o.status === 'confirmed' || o.status === 'in_progress'
         );
+        
+        // 计算总收入
+        const totalIncome = myOrders.reduce((sum: number, order: any) => {
+          return sum + (order.financials?.contractorIncome || 0);
+        }, 0);
+
         this.setData({
           myOrders,
           'stats.inProgressCount': inProgressOrders.length,
+          'stats.totalIncome': totalIncome,
         });
       } else {
         this.setData({
           myOrders: [],
           'stats.inProgressCount': 0,
+          'stats.totalIncome': 0,
         });
       }
 

@@ -30,21 +30,41 @@ Page({
     const role = e.currentTarget.dataset.role;
     const userInfo = this.data.userInfo;
 
+    // 检查登录状态
     if (!userInfo) {
-      // 未登录，先登录
+      // 未登录，保存选择的角色，跳转到登录页
+      wx.setStorageSync('selectedRole', role);
       wx.reLaunch({
         url: '/pages/login/login',
       });
       return;
     }
 
-    // 更新用户角色（如果需要）
-    if (userInfo.role !== role) {
-      // 可以调用云函数更新角色
-      // 这里暂时直接跳转
+    // 已登录，验证角色匹配
+    if (userInfo.role && userInfo.role !== role) {
+      wx.showModal({
+        title: '提示',
+        content: `您的角色是${this.getRoleName(userInfo.role)}，无法进入${this.getRoleName(role)}端`,
+        showCancel: false,
+        confirmText: '确定',
+      });
+      return;
     }
 
     this.redirectToRole(role);
+  },
+
+  /**
+   * 获取角色名称
+   */
+  getRoleName(role: string): string {
+    const roleNames: Record<string, string> = {
+      farmer: '农户',
+      contractor: '工头',
+      worker: '工人',
+      introducer: '介绍方',
+    };
+    return roleNames[role] || role;
   },
 
   /**

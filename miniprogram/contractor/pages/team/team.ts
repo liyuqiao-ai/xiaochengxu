@@ -79,6 +79,18 @@ Page({
    */
   async reviewRequest(e: any) {
     const { requestId, action } = e.currentTarget.dataset;
+    const userInfo = wx.getStorageSync('userInfo');
+
+    if (!userInfo) {
+      wx.showToast({
+        title: '请先登录',
+        icon: 'none',
+      });
+      return;
+    }
+
+    // 将action转换为status
+    const status = action === 'approve' ? 'approved' : 'rejected';
 
     try {
       wx.showLoading({ title: '处理中...' });
@@ -87,7 +99,8 @@ Page({
         name: 'reviewTeamRequest',
         data: {
           requestId,
-          action, // 'approve' or 'reject'
+          status, // 'approved' or 'rejected'
+          contractorId: userInfo._id,
         },
       });
 
@@ -95,9 +108,10 @@ Page({
 
       if (result.result.success) {
         wx.showToast({
-          title: action === 'approve' ? '已同意' : '已拒绝',
+          title: status === 'approved' ? '已同意' : '已拒绝',
           icon: 'success',
         });
+        // 刷新数据
         this.loadData();
       } else {
         wx.showToast({

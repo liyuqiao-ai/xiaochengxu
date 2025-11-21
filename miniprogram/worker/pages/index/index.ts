@@ -7,10 +7,39 @@ Page({
     userInfo: null as any,
     nearbyTasks: [] as any[],
     myTasks: [] as any[],
+    stats: {
+      nearbyTasksCount: 0,
+      myTasksCount: 0,
+      todayIncome: 0, // 今日收入
+    },
     loading: false,
   },
 
   onLoad() {
+    // 先检查登录状态和角色权限
+    const userInfo = wx.getStorageSync('userInfo');
+    if (!userInfo) {
+      wx.reLaunch({
+        url: '/pages/login/login',
+      });
+      return;
+    }
+
+    // 验证角色权限
+    if (userInfo.role !== 'worker') {
+      wx.showModal({
+        title: '提示',
+        content: '您不是工人，无法访问此页面',
+        showCancel: false,
+        success: () => {
+          wx.reLaunch({
+            url: '/pages/entry/entry',
+          });
+        },
+      });
+      return;
+    }
+
     this.loadUserInfo();
     this.loadTasks();
   },
@@ -71,12 +100,15 @@ Page({
         });
 
         if (nearbyResult.result.success) {
+          const tasks = nearbyResult.result.data?.tasks || [];
           this.setData({
-            nearbyTasks: nearbyResult.result.data?.tasks || [],
+            nearbyTasks: tasks,
+            'stats.nearbyTasksCount': tasks.length,
           });
         } else {
           this.setData({
             nearbyTasks: [],
+            'stats.nearbyTasksCount': 0,
           });
         }
       } else {
@@ -93,12 +125,15 @@ Page({
         });
 
         if (myTasksResult.result.success) {
+          const tasks = myTasksResult.result.data?.tasks || [];
           this.setData({
-            myTasks: myTasksResult.result.data?.tasks || [],
+            myTasks: tasks,
+            'stats.myTasksCount': tasks.length,
           });
         } else {
           this.setData({
             myTasks: [],
+            'stats.myTasksCount': 0,
           });
         }
       } catch (error) {

@@ -9,9 +9,39 @@ Page({
     totalCommission: 0,
     myProjects: [] as any[],
     commissionRecords: [] as any[],
+    stats: {
+      totalProjects: 0,
+      totalCommission: 0,
+      pendingCommission: 0,
+    },
+    qrCodeUrl: '', // 推广二维码
   },
 
   onLoad() {
+    // 先检查登录状态和角色权限
+    const userInfo = wx.getStorageSync('userInfo');
+    if (!userInfo) {
+      wx.reLaunch({
+        url: '/pages/login/login',
+      });
+      return;
+    }
+
+    // 验证角色权限
+    if (userInfo.role !== 'introducer') {
+      wx.showModal({
+        title: '提示',
+        content: '您不是介绍方，无法访问此页面',
+        showCancel: false,
+        success: () => {
+          wx.reLaunch({
+            url: '/pages/entry/entry',
+          });
+        },
+      });
+      return;
+    }
+
     this.loadUserInfo();
     this.loadData();
   },
@@ -66,18 +96,28 @@ Page({
       });
 
       if (projectsResult.result.success) {
+        const projects = projectsResult.result.data?.projects || [];
+        const totalCommission = projects.reduce((sum: number, p: any) => {
+          return sum + (p.commission || 0);
+        }, 0);
+        
         this.setData({
-          myProjects: projectsResult.result.data?.projects || [],
+          myProjects: projects,
+          'stats.totalProjects': projects.length,
+          'stats.totalCommission': totalCommission,
         });
       } else {
         this.setData({
           myProjects: [],
+          'stats.totalProjects': 0,
+          'stats.totalCommission': 0,
         });
       }
 
       if (commissionResult.result.success) {
+        const records = commissionResult.result.data?.records || [];
         this.setData({
-          commissionRecords: commissionResult.result.data?.records || [],
+          commissionRecords: records,
         });
       } else {
         this.setData({
@@ -118,6 +158,62 @@ Page({
   },
 
   /**
+   * 生成推广码（如果不存在）
+   */
+  async generatePromoCode() {
+    const userInfo = wx.getStorageSync('userInfo');
+    if (!userInfo) {
+      wx.showToast({
+        title: '请先登录',
+        icon: 'none',
+      });
+      return;
+    }
+
+    try {
+      wx.showLoading({ title: '生成中...' });
+
+      // 如果已有推广码，直接使用
+      if (this.data.promotionCode) {
+        await this.generateQRCode();
+        wx.hideLoading();
+        return;
+      }
+
+      // 调用云函数生成推广码
+      const result = await wx.cloud.callFunction({
+        name: 'generatePromoCode',
+        data: {
+          introducerId: userInfo._id,
+        },
+      });
+
+      wx.hideLoading();
+
+      if (result.result.success) {
+        const promoCode = result.result.data?.promoCode || '';
+        this.setData({
+          promotionCode: promoCode,
+        });
+        // 生成二维码
+        await this.generateQRCode();
+      } else {
+        wx.showToast({
+          title: result.result.error || '生成失败',
+          icon: 'none',
+        });
+      }
+    } catch (error) {
+      wx.hideLoading();
+      console.error('生成推广码失败:', error);
+      wx.showToast({
+        title: '生成失败',
+        icon: 'none',
+      });
+    }
+  },
+
+  /**
    * 生成推广二维码
    */
   async generateQRCode() {
@@ -145,6 +241,9 @@ Page({
       wx.hideLoading();
 
       if (result.result.success && result.result.data?.fileID) {
+        this.setData({
+          qrCodeUrl: result.result.data.fileID,
+        });
         // 预览二维码
         wx.previewImage({
           urls: [result.result.data.fileID],
@@ -163,6 +262,33 @@ Page({
         title: '生成失败',
         icon: 'none',
       });
+    }
+  },
+
+  /**
+   * 获取佣金统计
+   */
+  async loadCommissionStats() {
+    const userInfo = wx.getStorageSync('userInfo');
+    if (!userInfo) {
+      return;
+    }
+
+    try {
+      const result = await wx.cloud.callFunction({
+        name: 'getCommissionStats',
+        data: {
+          introducerId: userInfo._id,
+        },
+      });
+
+      if (result.result.success) {
+        this.setData({
+          stats: result.result.data?.stats || this.data.stats,
+        });
+      }
+    } catch (error) {
+      console.error('获取佣金统计失败:', error);
     }
   },
 
