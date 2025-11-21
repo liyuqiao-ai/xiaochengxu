@@ -6,7 +6,7 @@
 
   <view class="role-list">
     <!-- 农户 -->
-    <view class="role-item" bindtap="selectRole" data-role="farmer">
+    <view class="role-item" catchtap="selectRole" data-role="farmer">
       <view class="role-icon">🌾</view>
       <view class="role-content">
         <text class="role-name">农户</text>
@@ -16,7 +16,7 @@
     </view>
 
     <!-- 工头 -->
-    <view class="role-item" bindtap="selectRole" data-role="contractor">
+    <view class="role-item" catchtap="selectRole" data-role="contractor">
       <view class="role-icon">👷</view>
       <view class="role-content">
         <text class="role-name">工头</text>
@@ -26,7 +26,7 @@
     </view>
 
     <!-- 工人 -->
-    <view class="role-item" bindtap="selectRole" data-role="worker">
+    <view class="role-item" catchtap="selectRole" data-role="worker">
       <view class="role-icon">👨‍🌾</view>
       <view class="role-content">
         <text class="role-name">工人</text>
@@ -36,7 +36,7 @@
     </view>
 
     <!-- 介绍方 -->
-    <view class="role-item" bindtap="selectRole" data-role="introducer">
+    <view class="role-item" catchtap="selectRole" data-role="introducer">
       <view class="role-icon">🤝</view>
       <view class="role-content">
         <text class="role-name">介绍方</text>

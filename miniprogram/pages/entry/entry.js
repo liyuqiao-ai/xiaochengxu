@@ -30,19 +30,50 @@ Page({
    * 选择角色
    */
   selectRole(e) {
+    console.log('selectRole被调用', e);
+    
+    if (!e || !e.currentTarget) {
+      console.error('事件对象无效');
+      wx.showToast({
+        title: '点击无效，请重试',
+        icon: 'none',
+      });
+      return;
+    }
+
     const role = e.currentTarget.dataset.role;
+    console.log('选择的角色:', role);
+
+    if (!role) {
+      console.error('角色数据无效');
+      wx.showToast({
+        title: '角色数据无效',
+        icon: 'none',
+      });
+      return;
+    }
+
     const userInfo = this.data.userInfo;
 
+    // 如果未登录，允许选择角色但提示需要登录
     if (!userInfo) {
-      // 未登录，先登录
+      console.log('用户未登录，允许选择角色但需要登录');
+      // 先保存选择的角色到本地，然后跳转到登录页
+      wx.setStorageSync('selectedRole', role);
       wx.reLaunch({
         url: '/pages/login/login',
+        fail: (err) => {
+          console.error('跳转登录页失败:', err);
+          // 如果登录页不存在，直接跳转到对应角色页面（允许未登录访问）
+          this.redirectToRole(role);
+        },
       });
       return;
     }
 
     // 更新用户角色（如果需要）
     if (userInfo.role !== role) {
+      console.log('更新用户角色:', userInfo.role, '->', role);
       // 可以调用云函数更新角色
       // 这里暂时直接跳转
     }
@@ -55,6 +86,8 @@ Page({
    * 严格按照要求：严格跳转到对应subPackage首页
    */
   redirectToRole(role) {
+    console.log('redirectToRole被调用，角色:', role);
+    
     // 严格按照多subPackages架构跳转
     const roleRoutes = {
       farmer: '/farmer/pages/index/index',
@@ -65,6 +98,7 @@ Page({
 
     const route = roleRoutes[role];
     if (!route) {
+      console.error('无效的角色:', role);
       wx.showToast({
         title: '无效的角色',
         icon: 'none',
@@ -72,14 +106,30 @@ Page({
       return;
     }
 
-    // 使用reLaunch确保完全跳转到subPackage
-    wx.reLaunch({
+    console.log('准备跳转到:', route);
+
+    // 使用navigateTo先尝试，如果失败再用reLaunch
+    wx.navigateTo({
       url: route,
+      success: () => {
+        console.log('跳转成功:', route);
+      },
       fail: (err) => {
-        console.error('跳转失败:', err);
-        wx.showToast({
-          title: '跳转失败，请重试',
-          icon: 'none',
+        console.warn('navigateTo失败，尝试reLaunch:', err);
+        // 如果navigateTo失败，可能是subPackage路径问题，使用reLaunch
+        wx.reLaunch({
+          url: route,
+          success: () => {
+            console.log('reLaunch跳转成功:', route);
+          },
+          fail: (reLaunchErr) => {
+            console.error('跳转失败:', reLaunchErr);
+            wx.showToast({
+              title: '跳转失败: ' + (reLaunchErr.errMsg || '未知错误'),
+              icon: 'none',
+              duration: 3000,
+            });
+          },
         });
       },
     });
