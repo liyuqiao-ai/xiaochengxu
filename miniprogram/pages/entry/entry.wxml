@@ -1,0 +1,41 @@
+<view class="container">
+  <view class="header">
+    <text class="title">农业零工平台</text>
+    <text class="subtitle">请选择您的身份</text>
+  </view>
+
+  <view class="role-list">
+    <!-- 农户 -->
+    <view class="role-item" bindtap="selectRole" data-role="farmer">
+      <view class="role-icon">🌾</view>
+      <text class="role-name">农户</text>
+      <text class="role-desc">发布农业需求，寻找工人</text>
+    </view>
+
+    <!-- 工头 -->
+    <view class="role-item" bindtap="selectRole" data-role="contractor">
+      <view class="role-icon">👷</view>
+      <text class="role-name">工头</text>
+      <text class="role-desc">接单报价，管理团队</text>
+    </view>
+
+    <!-- 工人 -->
+    <view class="role-item" bindtap="selectRole" data-role="worker">
+      <view class="role-icon">👨‍🌾</view>
+      <text class="role-name">工人</text>
+      <text class="role-desc">寻找工作，加入团队</text>
+    </view>
+
+    <!-- 介绍方 -->
+    <view class="role-item" bindtap="selectRole" data-role="introducer">
+      <view class="role-icon">🤝</view>
+      <text class="role-name">介绍方</text>
+      <text class="role-desc">推广项目，获得佣金</text>
+    </view>
+  </view>
+
+  <view class="footer" wx:if="{{!userInfo}}">
+    <button class="login-btn" bindtap="goToLogin">登录账号</button>
+  </view>
+</view>
+

@@ -1,0 +1,90 @@
+<view class="container">
+  <!-- 用户信息卡片 -->
+  <view class="user-card" wx:if="{{userInfo}}">
+    <image class="avatar" src="{{userInfo.avatarUrl}}" mode="aspectFill"></image>
+    <view class="user-info">
+      <text class="nickname">{{userInfo.nickName}}</text>
+      <text class="role">农户</text>
+    </view>
+  </view>
+
+  <!-- 快捷操作 -->
+  <view class="quick-actions">
+    <view class="action-item" bindtap="publishDemand">
+      <view class="action-icon">📝</view>
+      <text class="action-text">发布需求</text>
+    </view>
+    <view class="action-item" bindtap="viewPendingQuotes">
+      <view class="action-icon">💬</view>
+      <text class="action-text">待处理报价</text>
+      <view class="badge" wx:if="{{pendingQuotes > 0}}">{{pendingQuotes}}</view>
+    </view>
+  </view>
+
+  <!-- 待处理订单 -->
+  <view class="section" wx:if="{{pendingOrders.length > 0}}">
+    <view class="section-header">
+      <text class="section-title">待处理订单</text>
+      <text class="section-count">{{pendingOrders.length}}</text>
+    </view>
+    <view class="order-list">
+      <view
+        class="order-item"
+        wx:for="{{pendingOrders}}"
+        wx:key="_id"
+        bindtap="viewOrderDetail"
+        data-order-id="{{item._id}}"
+      >
+        <view class="order-header">
+          <text class="order-job">{{item.jobType}}</text>
+          <text class="order-status {{item.status}}">
+            {{item.status === 'pending' ? '待报价' : '已报价'}}
+          </text>
+        </view>
+        <view class="order-info">
+          <text class="order-location">📍 {{item.location.address}}</text>
+        </view>
+        <view class="order-time">
+          <text>{{item.timeline.createdAt}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 进行中订单 -->
+  <view class="section" wx:if="{{inProgressOrders.length > 0}}">
+    <view class="section-header">
+      <text class="section-title">进行中订单</text>
+      <text class="section-count">{{inProgressOrders.length}}</text>
+    </view>
+    <view class="order-list">
+      <view
+        class="order-item"
+        wx:for="{{inProgressOrders}}"
+        wx:key="_id"
+        bindtap="viewOrderDetail"
+        data-order-id="{{item._id}}"
+      >
+        <view class="order-header">
+          <text class="order-job">{{item.jobType}}</text>
+          <text class="order-status {{item.status}}">
+            {{item.status === 'confirmed' ? '已确认' : '进行中'}}
+          </text>
+        </view>
+        <view class="order-info">
+          <text class="order-location">📍 {{item.location.address}}</text>
+        </view>
+        <view class="order-time">
+          <text>{{item.timeline.startedAt || item.timeline.confirmedAt}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty" wx:if="{{!loading && pendingOrders.length === 0 && inProgressOrders.length === 0}}">
+    <text class="empty-text">暂无订单</text>
+    <button class="empty-btn" bindtap="publishDemand">发布第一个需求</button>
+  </view>
+</view>
+

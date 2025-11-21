@@ -2,6 +2,15 @@
  * 微信小程序类型定义
  */
 
+// 声明全局 console 对象（小程序环境支持）
+declare var console: {
+  log(...args: any[]): void;
+  error(...args: any[]): void;
+  warn(...args: any[]): void;
+  info(...args: any[]): void;
+  debug(...args: any[]): void;
+};
+
 declare namespace wx {
   interface CloudInitOptions {
     env: string;

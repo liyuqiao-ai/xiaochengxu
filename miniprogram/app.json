@@ -1,6 +1,6 @@
 {
   "pages": [
-    "pages/index/index",
+    "pages/entry/entry",
     "pages/login/login"
   ],
   "subPackages": [
@@ -19,10 +19,12 @@
     {
       "root": "farmer",
       "pages": [
+        "pages/index/index",
+        "pages/publish-demand/publish-demand",
+        "pages/quote-list/quote-list",
         "pages/order-detail/order-detail",
         "pages/quotes/quotes",
-        "pages/payment/payment",
-        "pages/publish-demand/publish-demand"
+        "pages/payment/payment"
       ]
     },
     {
@@ -52,12 +54,19 @@
     "selectedColor": "#4CAF50",
     "borderStyle": "black",
     "backgroundColor": "#ffffff",
+    "custom": false,
     "list": [
       {
-        "pagePath": "pages/index/index",
+        "pagePath": "farmer/pages/index/index",
         "iconPath": "images/home.png",
         "selectedIconPath": "images/home-active.png",
-        "text": "首页"
+        "text": "工作台"
+      },
+      {
+        "pagePath": "pages/profile/profile",
+        "iconPath": "images/profile.png",
+        "selectedIconPath": "images/profile-active.png",
+        "text": "我的"
       }
     ]
   },
