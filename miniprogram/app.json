@@ -7,6 +7,7 @@
     "contractor/pages/submit-quote/submit-quote",
     "farmer/pages/order-detail/order-detail",
     "farmer/pages/quotes/quotes",
+    "farmer/pages/payment/payment",
     "worker/pages/index/index",
     "introducer/pages/index/index"
   ],
