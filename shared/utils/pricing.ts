@@ -104,7 +104,7 @@ export class PricingEngine {
         if (!order.monthlyInfo) {
           throw new Error('包月模式缺少monthlyInfo信息');
         }
-        // 月薪按208小时计算（26天×8小时）
+        // 月薪按配置的标准工时计算
         hourlyRate = order.monthlyInfo.monthlySalary / PLATFORM_CONFIG.PRICING.MONTHLY_STANDARD_HOURS;
         break;
 
