@@ -50,7 +50,6 @@ export const main = async (event: SubmitQuoteEvent) => {
     }
 
     // 3. 参数验证
-    const { orderId, contractorId, quotePrice } = event;
     if (!orderId || !contractorId || !quotePrice) {
       return createInvalidParamsResponse('参数不完整：orderId, contractorId, quotePrice');
     }
