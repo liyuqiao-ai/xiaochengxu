@@ -11,9 +11,17 @@ Page({
     // 检查是否已登录
     const userInfo = wx.getStorageSync('userInfo');
     if (userInfo) {
-      wx.reLaunch({
-        url: '/pages/index/index',
-      });
+      // 已登录，根据角色跳转
+      const selectedRole = wx.getStorageSync('selectedRole');
+      const role = selectedRole || userInfo.role;
+      const roleRoutes: Record<string, string> = {
+        farmer: '/farmer/pages/index/index',
+        contractor: '/contractor/pages/index/index',
+        worker: '/worker/pages/index/index',
+        introducer: '/introducer/pages/index/index',
+      };
+      const route = roleRoutes[role] || '/pages/entry/entry';
+      wx.reLaunch({ url: route });
     }
   },
 
