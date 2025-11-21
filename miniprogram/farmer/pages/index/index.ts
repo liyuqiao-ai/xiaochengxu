@@ -39,6 +39,7 @@ Page({
       wx.reLaunch({
         url: '/pages/login/login',
       });
+      return;
     }
   },
 
@@ -46,6 +47,12 @@ Page({
    * 加载数据
    */
   async loadData() {
+    // 检查是否已登录
+    const userInfo = wx.getStorageSync('userInfo');
+    if (!userInfo) {
+      return;
+    }
+
     try {
       this.setData({ loading: true });
 
@@ -78,14 +85,22 @@ Page({
           loading: false,
         });
       } else {
-        this.setData({ loading: false });
+        // 即使失败也显示空状态
+        this.setData({
+          pendingOrders: [],
+          inProgressOrders: [],
+          pendingQuotes: 0,
+          loading: false,
+        });
       }
     } catch (error) {
       console.error('加载数据失败:', error);
-      this.setData({ loading: false });
-      wx.showToast({
-        title: '加载失败',
-        icon: 'none',
+      // 出错时也显示空状态
+      this.setData({
+        pendingOrders: [],
+        inProgressOrders: [],
+        pendingQuotes: 0,
+        loading: false,
       });
     }
   },

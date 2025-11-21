@@ -33,6 +33,12 @@ Page({
         promotionCode: userInfo.promotionCode || '',
         totalCommission: userInfo.totalCommission || 0,
       });
+    } else {
+      // 未登录，跳转到登录页
+      wx.reLaunch({
+        url: '/pages/login/login',
+      });
+      return;
     }
   },
 
@@ -40,6 +46,12 @@ Page({
    * 加载数据
    */
   async loadData() {
+    // 检查是否已登录
+    const userInfo = wx.getStorageSync('userInfo');
+    if (!userInfo) {
+      return;
+    }
+
     try {
       // 获取我的项目
       const projectsResult = await wx.cloud.callFunction({
@@ -57,18 +69,27 @@ Page({
         this.setData({
           myProjects: projectsResult.result.data?.projects || [],
         });
+      } else {
+        this.setData({
+          myProjects: [],
+        });
       }
 
       if (commissionResult.result.success) {
         this.setData({
           commissionRecords: commissionResult.result.data?.records || [],
         });
+      } else {
+        this.setData({
+          commissionRecords: [],
+        });
       }
     } catch (error) {
       console.error('加载数据失败:', error);
-      wx.showToast({
-        title: '加载失败',
-        icon: 'none',
+      // 出错时显示空状态
+      this.setData({
+        myProjects: [],
+        commissionRecords: [],
       });
     }
   },

@@ -48,13 +48,37 @@ Page({
 
       if (result.result.success) {
         // 保存用户信息
-        wx.setStorageSync('userInfo', result.result.userInfo);
+        const userInfo = result.result.userInfo;
+        wx.setStorageSync('userInfo', userInfo);
         wx.setStorageSync('token', result.result.token);
 
-        // 跳转到首页
-        wx.reLaunch({
-          url: '/pages/index/index',
-        });
+        // 检查是否有选择的角色
+        const selectedRole = wx.getStorageSync('selectedRole');
+        if (selectedRole) {
+          // 如果有选择的角色，跳转到对应角色页面
+          wx.removeStorageSync('selectedRole');
+          const roleRoutes: Record<string, string> = {
+            farmer: '/farmer/pages/index/index',
+            contractor: '/contractor/pages/index/index',
+            worker: '/worker/pages/index/index',
+            introducer: '/introducer/pages/index/index',
+          };
+          const route = roleRoutes[selectedRole];
+          if (route) {
+            wx.reLaunch({ url: route });
+            return;
+          }
+        }
+
+        // 根据用户角色跳转
+        const roleRoutes: Record<string, string> = {
+          farmer: '/farmer/pages/index/index',
+          contractor: '/contractor/pages/index/index',
+          worker: '/worker/pages/index/index',
+          introducer: '/introducer/pages/index/index',
+        };
+        const route = roleRoutes[userInfo.role] || '/pages/entry/entry';
+        wx.reLaunch({ url: route });
       } else {
         wx.showToast({
           title: result.result.error || '登录失败',

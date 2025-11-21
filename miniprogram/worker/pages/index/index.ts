@@ -28,6 +28,12 @@ Page({
     const userInfo = wx.getStorageSync('userInfo');
     if (userInfo) {
       this.setData({ userInfo });
+    } else {
+      // 未登录，跳转到登录页
+      wx.reLaunch({
+        url: '/pages/login/login',
+      });
+      return;
     }
   },
 
@@ -35,37 +41,70 @@ Page({
    * 加载任务列表
    */
   async loadTasks() {
+    // 检查是否已登录
+    const userInfo = wx.getStorageSync('userInfo');
+    if (!userInfo) {
+      return;
+    }
+
     try {
       this.setData({ loading: true });
 
       // 获取用户位置
-      const location = await this.getLocation();
+      let location: any = null;
+      try {
+        location = await this.getLocation();
+      } catch (error) {
+        console.warn('获取位置失败:', error);
+        // 位置获取失败不影响加载任务，使用默认值
+      }
 
-      // 获取附近任务（状态为confirmed或in_progress的订单）
-      const nearbyResult = await wx.cloud.callFunction({
-        name: 'getNearbyTasks',
-        data: {
-          lat: location?.latitude,
-          lng: location?.longitude,
-          radius: 50000, // 50公里
-        },
-      });
+      // 获取附近任务
+      if (location) {
+        const nearbyResult = await wx.cloud.callFunction({
+          name: 'getNearbyTasks',
+          data: {
+            lat: location.latitude,
+            lng: location.longitude,
+            radius: 50, // 50公里
+          },
+        });
 
-      // 获取我的任务（通过contractorId关联的订单）
-      const myTasksResult = await wx.cloud.callFunction({
-        name: 'getMyTasks',
-        data: {},
-      });
-
-      if (nearbyResult.result.success) {
+        if (nearbyResult.result.success) {
+          this.setData({
+            nearbyTasks: nearbyResult.result.data?.tasks || [],
+          });
+        } else {
+          this.setData({
+            nearbyTasks: [],
+          });
+        }
+      } else {
         this.setData({
-          nearbyTasks: nearbyResult.result.data?.tasks || [],
+          nearbyTasks: [],
         });
       }
 
-      if (myTasksResult.result.success) {
+      // 获取我的任务
+      try {
+        const myTasksResult = await wx.cloud.callFunction({
+          name: 'getMyTasks',
+          data: {},
+        });
+
+        if (myTasksResult.result.success) {
+          this.setData({
+            myTasks: myTasksResult.result.data?.tasks || [],
+          });
+        } else {
+          this.setData({
+            myTasks: [],
+          });
+        }
+      } catch (error) {
+        console.error('获取我的任务失败:', error);
         this.setData({
-          myTasks: myTasksResult.result.data?.tasks || [],
+          myTasks: [],
         });
       }
 
@@ -73,9 +112,10 @@ Page({
     } catch (error) {
       this.setData({ loading: false });
       console.error('加载任务失败:', error);
-      wx.showToast({
-        title: '加载失败',
-        icon: 'none',
+      // 出错时显示空状态
+      this.setData({
+        nearbyTasks: [],
+        myTasks: [],
       });
     }
   },

@@ -32,6 +32,12 @@ Page({
     const userInfo = wx.getStorageSync('userInfo');
     if (userInfo) {
       this.setData({ userInfo });
+    } else {
+      // 未登录，跳转到登录页
+      wx.reLaunch({
+        url: '/pages/login/login',
+      });
+      return;
     }
   },
 
@@ -39,15 +45,23 @@ Page({
    * 加载订单列表
    */
   async loadOrders() {
+    // 检查是否已登录
+    const userInfo = wx.getStorageSync('userInfo');
+    if (!userInfo) {
+      return;
+    }
+
     try {
       // 获取待报价订单
       const quotesResult = await wx.cloud.callFunction({
         name: 'getPendingOrders',
+        data: {},
       });
 
       // 获取我的订单
       const myOrdersResult = await wx.cloud.callFunction({
         name: 'getMyOrders',
+        data: {},
       });
 
       if (quotesResult.result.success) {
@@ -55,6 +69,11 @@ Page({
         this.setData({
           pendingQuotes,
           'stats.pendingQuotesCount': pendingQuotes.length,
+        });
+      } else {
+        this.setData({
+          pendingQuotes: [],
+          'stats.pendingQuotesCount': 0,
         });
       }
 
@@ -66,6 +85,11 @@ Page({
         this.setData({
           myOrders,
           'stats.inProgressCount': inProgressOrders.length,
+        });
+      } else {
+        this.setData({
+          myOrders: [],
+          'stats.inProgressCount': 0,
         });
       }
 
@@ -80,15 +104,26 @@ Page({
           this.setData({
             'stats.teamSize': members.length,
           });
+        } else {
+          this.setData({
+            'stats.teamSize': 0,
+          });
         }
       } catch (error) {
         console.error('获取团队信息失败:', error);
+        this.setData({
+          'stats.teamSize': 0,
+        });
       }
     } catch (error) {
       console.error('加载订单失败:', error);
-      wx.showToast({
-        title: '加载失败',
-        icon: 'none',
+      // 出错时显示空状态
+      this.setData({
+        pendingQuotes: [],
+        myOrders: [],
+        'stats.pendingQuotesCount': 0,
+        'stats.inProgressCount': 0,
+        'stats.teamSize': 0,
       });
     }
   },

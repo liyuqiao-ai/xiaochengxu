@@ -55,13 +55,15 @@ Page({
 
     const userInfo = this.data.userInfo;
 
-    // 如果未登录，直接跳转到对应角色页面（允许未登录访问，登录功能后续完善）
+    // 如果未登录，先跳转到登录页
     if (!userInfo) {
-      console.log('用户未登录，直接跳转到角色页面');
-      // 保存选择的角色到本地
+      console.log('用户未登录，跳转到登录页');
+      // 保存选择的角色到本地，登录后使用
       wx.setStorageSync('selectedRole', role);
-      // 直接跳转到对应角色页面
-      this.redirectToRole(role);
+      // 跳转到登录页
+      wx.reLaunch({
+        url: '/pages/login/login',
+      });
       return;
     }
 
