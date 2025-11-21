@@ -8,10 +8,9 @@
       "root": "contractor",
       "pages": [
         "pages/index/index",
-        "pages/order-detail/order-detail",
+        "pages/order-list/order-list",
         "pages/submit-quote/submit-quote",
-        "pages/quote/quote",
-        "pages/quote-list/quote-list",
+        "pages/order-detail/order-detail",
         "pages/team/team",
         "pages/update-progress/update-progress"
       ]
@@ -31,6 +30,7 @@
       "root": "worker",
       "pages": [
         "pages/index/index",
+        "pages/task-list/task-list",
         "pages/task-detail/task-detail",
         "pages/profile/profile"
       ]
@@ -38,7 +38,9 @@
     {
       "root": "introducer",
       "pages": [
-        "pages/index/index"
+        "pages/index/index",
+        "pages/promotion/promotion",
+        "pages/commission/commission"
       ]
     }
   ],
@@ -48,27 +50,6 @@
     "navigationBarTitleText": "农业零工平台",
     "navigationBarTextStyle": "white",
     "enablePullDownRefresh": true
-  },
-  "tabBar": {
-    "color": "#7A7E83",
-    "selectedColor": "#4CAF50",
-    "borderStyle": "black",
-    "backgroundColor": "#ffffff",
-    "custom": false,
-    "list": [
-      {
-        "pagePath": "farmer/pages/index/index",
-        "iconPath": "images/home.png",
-        "selectedIconPath": "images/home-active.png",
-        "text": "工作台"
-      },
-      {
-        "pagePath": "pages/profile/profile",
-        "iconPath": "images/profile.png",
-        "selectedIconPath": "images/profile-active.png",
-        "text": "我的"
-      }
-    ]
   },
   "permission": {
     "scope.userLocation": {

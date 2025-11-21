@@ -1,0 +1,121 @@
+.container {
+  min-height: 100vh;
+  background-color: #f5f5f5;
+  padding: 20rpx;
+  padding-bottom: 120rpx;
+}
+
+.commission-stats {
+  margin-bottom: 20rpx;
+}
+
+.stat-card {
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  border-radius: 10rpx;
+  padding: 40rpx;
+  text-align: center;
+  color: white;
+}
+
+.stat-label {
+  display: block;
+  font-size: 28rpx;
+  opacity: 0.9;
+  margin-bottom: 20rpx;
+}
+
+.stat-value {
+  display: block;
+  font-size: 64rpx;
+  font-weight: bold;
+}
+
+.commission-list {
+  background: white;
+  border-radius: 10rpx;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 30rpx;
+  padding-bottom: 20rpx;
+  border-bottom: 2rpx solid #f0f0f0;
+}
+
+.commission-item {
+  padding: 30rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.commission-item:last-child {
+  border-bottom: none;
+}
+
+.item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15rpx;
+}
+
+.item-type {
+  font-size: 32rpx;
+  color: #333;
+  font-weight: bold;
+}
+
+.item-amount {
+  font-size: 36rpx;
+  color: #4CAF50;
+  font-weight: bold;
+}
+
+.item-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 24rpx;
+  color: #999;
+}
+
+.item-order {
+  flex: 1;
+}
+
+.item-time {
+  margin-left: 20rpx;
+}
+
+.empty {
+  text-align: center;
+  padding: 100rpx 40rpx;
+}
+
+.empty-text {
+  font-size: 32rpx;
+  color: #999;
+}
+
+.action-section {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 20rpx;
+  background: white;
+  border-top: 1rpx solid #eee;
+  box-shadow: 0 -2rpx 10rpx rgba(0, 0, 0, 0.1);
+}
+
+.btn-withdraw {
+  width: 100%;
+  background: #4CAF50;
+  color: white;
+  border-radius: 10rpx;
+  padding: 30rpx;
+  font-size: 32rpx;
+}
+

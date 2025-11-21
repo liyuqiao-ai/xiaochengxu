@@ -2,7 +2,38 @@
   <view class="header">
     <view class="user-info" wx:if="{{userInfo}}">
       <image class="avatar" src="{{userInfo.avatarUrl}}" mode="aspectFill"></image>
-      <text class="nickname">{{userInfo.nickName}}</text>
+      <view class="user-details">
+        <text class="nickname">{{userInfo.nickName}}</text>
+        <text class="role">工头</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 数据概览 -->
+  <view class="stats-section">
+    <view class="stat-item" bindtap="viewOrderList">
+      <text class="stat-value">{{stats.pendingQuotesCount}}</text>
+      <text class="stat-label">待报价</text>
+    </view>
+    <view class="stat-item" bindtap="viewOrderDetail">
+      <text class="stat-value">{{stats.inProgressCount}}</text>
+      <text class="stat-label">进行中</text>
+    </view>
+    <view class="stat-item" bindtap="viewTeam">
+      <text class="stat-value">{{stats.teamSize}}</text>
+      <text class="stat-label">团队成员</text>
+    </view>
+  </view>
+
+  <!-- 快捷操作 -->
+  <view class="quick-actions">
+    <view class="action-item" bindtap="viewOrderList">
+      <view class="action-icon">📋</view>
+      <text class="action-text">需求广场</text>
+    </view>
+    <view class="action-item" bindtap="viewTeam">
+      <view class="action-icon">👥</view>
+      <text class="action-text">团队管理</text>
     </view>
   </view>
 

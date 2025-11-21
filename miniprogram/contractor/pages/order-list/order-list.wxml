@@ -1,0 +1,64 @@
+<view class="container">
+  <!-- 筛选栏 -->
+  <view class="filter-bar">
+    <picker mode="selector" range="{{jobTypes}}" range-key="name" value="{{jobTypeIndex}}" bindchange="filterJobType">
+      <view class="filter-item">
+        <text>工种：{{jobTypes[jobTypeIndex].name}}</text>
+      </view>
+    </picker>
+    <picker mode="selector" range="{{pricingModes}}" range-key="name" value="{{pricingModeIndex}}" bindchange="filterPricingMode">
+      <view class="filter-item">
+        <text>计价：{{pricingModes[pricingModeIndex].name}}</text>
+      </view>
+    </picker>
+  </view>
+
+  <!-- 订单列表 -->
+  <view class="order-list">
+    <view
+      class="order-item"
+      wx:for="{{orders}}"
+      wx:key="_id"
+      bindtap="viewOrderDetail"
+      data-order-id="{{item._id}}"
+    >
+      <view class="order-header">
+        <text class="order-job">{{item.jobType}}</text>
+        <text class="order-status pending">待报价</text>
+      </view>
+      
+      <view class="order-info">
+        <view class="info-row">
+          <text class="label">地点：</text>
+          <text class="value location" bindtap="viewLocation" data-location="{{item.location}}" catchtap="true">
+            {{item.location.address}}
+          </text>
+        </view>
+        <view class="info-row" wx:if="{{item.pricingMode === 'piece'}}">
+          <text class="label">数量：</text>
+          <text class="value">{{item.pieceInfo.estimatedQuantity}} {{item.pieceInfo.unit}}</text>
+        </view>
+        <view class="info-row" wx:if="{{item.pricingMode === 'daily'}}">
+          <text class="label">需求：</text>
+          <text class="value">{{item.dailyInfo.estimatedWorkers}}人 × {{item.dailyInfo.estimatedDays}}天</text>
+        </view>
+        <view class="info-row" wx:if="{{item.pricingMode === 'monthly'}}">
+          <text class="label">需求：</text>
+          <text class="value">{{item.monthlyInfo.estimatedWorkers}}人 × {{item.monthlyInfo.estimatedMonths}}月</text>
+        </view>
+      </view>
+
+      <view class="order-footer">
+        <text class="order-time">{{item.timeline.createdAt}}</text>
+        <button class="btn-quote" size="mini" catchtap="viewOrderDetail" data-order-id="{{item._id}}">
+          立即报价
+        </button>
+      </view>
+    </view>
+
+    <view class="empty" wx:if="{{!loading && orders.length === 0}}">
+      <text class="empty-text">暂无待报价订单</text>
+    </view>
+  </view>
+</view>
+

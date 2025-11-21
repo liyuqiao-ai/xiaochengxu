@@ -1,0 +1,50 @@
+<view class="container">
+  <!-- 任务列表 -->
+  <view class="task-list">
+    <view
+      class="task-item"
+      wx:for="{{tasks}}"
+      wx:key="_id"
+      bindtap="viewTaskDetail"
+      data-task-id="{{item._id}}"
+    >
+      <view class="task-header">
+        <text class="task-job">{{item.jobType}}</text>
+        <text class="task-status">{{item.status}}</text>
+      </view>
+
+      <view class="task-info">
+        <view class="info-row">
+          <text class="label">地点：</text>
+          <text class="value location" bindtap="viewLocation" data-location="{{item.location}}" catchtap="true">
+            {{item.location.address}}
+          </text>
+        </view>
+        <view class="info-row" wx:if="{{item.distance}}">
+          <text class="label">距离：</text>
+          <text class="value">{{item.distance}} 公里</text>
+        </view>
+        <view class="info-row" wx:if="{{item.pricingMode === 'piece'}}">
+          <text class="label">需求：</text>
+          <text class="value">{{item.pieceInfo.estimatedQuantity}} {{item.pieceInfo.unit}}</text>
+        </view>
+        <view class="info-row" wx:if="{{item.pricingMode === 'daily'}}">
+          <text class="label">需求：</text>
+          <text class="value">{{item.dailyInfo.estimatedWorkers}}人 × {{item.dailyInfo.estimatedDays}}天</text>
+        </view>
+      </view>
+
+      <view class="task-footer">
+        <text class="task-time">{{item.timeline.createdAt}}</text>
+        <text class="task-contractor" wx:if="{{item.contractorName}}">
+          工头：{{item.contractorName}}
+        </text>
+      </view>
+    </view>
+
+    <view class="empty" wx:if="{{!loading && tasks.length === 0}}">
+      <text class="empty-text">暂无附近任务</text>
+    </view>
+  </view>
+</view>
+

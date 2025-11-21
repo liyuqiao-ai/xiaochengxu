@@ -26,6 +26,16 @@
   <view class="quote-section">
     <view class="section-title">报价信息</view>
     
+    <!-- 智能报价建议 -->
+    <view class="suggested-price" wx:if="{{suggestedPrice > 0}}">
+      <view class="suggest-header">
+        <text class="suggest-label">💡 智能报价建议</text>
+        <button class="btn-use-suggest" size="mini" bindtap="useSuggestedPrice">使用建议</button>
+      </view>
+      <text class="suggest-value">¥{{suggestedPrice}}</text>
+      <text class="suggest-desc">基于市场行情和历史数据</text>
+    </view>
+
     <view class="form-item">
       <text class="label">报价金额（元）</text>
       <input

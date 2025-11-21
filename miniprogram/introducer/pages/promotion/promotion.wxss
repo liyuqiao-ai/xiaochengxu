@@ -1,0 +1,133 @@
+.container {
+  min-height: 100vh;
+  background-color: #f5f5f5;
+  padding: 20rpx;
+}
+
+.promotion-card {
+  background: white;
+  border-radius: 10rpx;
+  padding: 40rpx;
+  margin-bottom: 20rpx;
+}
+
+.card-header {
+  margin-bottom: 30rpx;
+}
+
+.card-title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.promotion-code-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 30rpx;
+  background: #f9f9f9;
+  border-radius: 8rpx;
+  margin-bottom: 20rpx;
+}
+
+.promotion-code {
+  font-size: 48rpx;
+  font-weight: bold;
+  color: #4CAF50;
+  letter-spacing: 4rpx;
+}
+
+.btn-copy {
+  background: #4CAF50;
+  color: white;
+  border-radius: 8rpx;
+}
+
+.promotion-desc {
+  font-size: 28rpx;
+  color: #666;
+  line-height: 1.6;
+}
+
+.qr-code-section {
+  background: white;
+  border-radius: 10rpx;
+  padding: 40rpx;
+  margin-bottom: 20rpx;
+  text-align: center;
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 30rpx;
+}
+
+.qr-code {
+  width: 400rpx;
+  height: 400rpx;
+  margin: 20rpx auto;
+  display: block;
+}
+
+.qr-desc {
+  display: block;
+  font-size: 28rpx;
+  color: #666;
+  margin-top: 20rpx;
+}
+
+.promotion-guide {
+  background: white;
+  border-radius: 10rpx;
+  padding: 40rpx;
+  margin-bottom: 20rpx;
+}
+
+.guide-item {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 30rpx;
+}
+
+.guide-item:last-child {
+  margin-bottom: 0;
+}
+
+.guide-number {
+  width: 48rpx;
+  height: 48rpx;
+  background: #4CAF50;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28rpx;
+  font-weight: bold;
+  margin-right: 20rpx;
+  flex-shrink: 0;
+}
+
+.guide-text {
+  flex: 1;
+  font-size: 28rpx;
+  color: #666;
+  line-height: 1.6;
+}
+
+.action-section {
+  padding: 20rpx;
+}
+
+.btn-share {
+  width: 100%;
+  background: #4CAF50;
+  color: white;
+  border-radius: 10rpx;
+  padding: 30rpx;
+  font-size: 32rpx;
+}
+

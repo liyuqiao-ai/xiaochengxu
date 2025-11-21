@@ -1,0 +1,38 @@
+<view class="container">
+  <!-- 佣金统计 -->
+  <view class="commission-stats">
+    <view class="stat-card">
+      <text class="stat-label">累计佣金</text>
+      <text class="stat-value">¥{{formatAmount(totalCommission)}}</text>
+    </view>
+  </view>
+
+  <!-- 佣金记录 -->
+  <view class="commission-list">
+    <view class="section-title">佣金记录</view>
+    <view
+      class="commission-item"
+      wx:for="{{commissionRecords}}"
+      wx:key="_id"
+    >
+      <view class="item-header">
+        <text class="item-type">{{item.type === 'order' ? '订单佣金' : '其他'}}</text>
+        <text class="item-amount">+¥{{formatAmount(item.amount)}}</text>
+      </view>
+      <view class="item-info">
+        <text class="item-order" wx:if="{{item.orderId}}">订单：{{item.orderId}}</text>
+        <text class="item-time">{{formatDate(item.createdAt)}}</text>
+      </view>
+    </view>
+
+    <view class="empty" wx:if="{{!loading && commissionRecords.length === 0}}">
+      <text class="empty-text">暂无佣金记录</text>
+    </view>
+  </view>
+
+  <!-- 提现按钮 -->
+  <view class="action-section">
+    <button class="btn-withdraw" bindtap="applyWithdraw">申请提现</button>
+  </view>
+</view>
+

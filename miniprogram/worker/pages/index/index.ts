@@ -94,12 +94,21 @@ Page({
   },
 
   /**
+   * 查看任务大厅
+   */
+  viewTaskList() {
+    wx.navigateTo({
+      url: '/worker/pages/task-list/task-list',
+    });
+  },
+
+  /**
    * 查看任务详情
    */
   viewTaskDetail(e: any) {
     const taskId = e.currentTarget.dataset.taskId;
     wx.navigateTo({
-      url: `/pages/worker/task-detail/task-detail?taskId=${taskId}`,
+      url: `/worker/pages/task-detail/task-detail?taskId=${taskId}`,
     });
   },
 

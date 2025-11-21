@@ -1,0 +1,45 @@
+<view class="container">
+  <!-- 推广码卡片 -->
+  <view class="promotion-card">
+    <view class="card-header">
+      <text class="card-title">我的推广码</text>
+    </view>
+    <view class="promotion-code-section">
+      <text class="promotion-code">{{promotionCode}}</text>
+      <button class="btn-copy" size="mini" bindtap="copyPromotionCode">复制</button>
+    </view>
+    <view class="promotion-desc">
+      <text>分享推广码给农户或工头，他们使用后您将获得佣金</text>
+    </view>
+  </view>
+
+  <!-- 二维码 -->
+  <view class="qr-code-section" wx:if="{{qrCodeUrl}}">
+    <view class="section-title">推广二维码</view>
+    <image class="qr-code" src="{{qrCodeUrl}}" mode="aspectFit"></image>
+    <text class="qr-desc">扫码即可使用推广码</text>
+  </view>
+
+  <!-- 推广说明 -->
+  <view class="promotion-guide">
+    <view class="section-title">推广说明</view>
+    <view class="guide-item">
+      <text class="guide-number">1</text>
+      <text class="guide-text">分享推广码或二维码给农户或工头</text>
+    </view>
+    <view class="guide-item">
+      <text class="guide-number">2</text>
+      <text class="guide-text">他们注册或下单时使用您的推广码</text>
+    </view>
+    <view class="guide-item">
+      <text class="guide-number">3</text>
+      <text class="guide-text">订单完成后，您将获得2%的佣金</text>
+    </view>
+  </view>
+
+  <!-- 分享按钮 -->
+  <view class="action-section">
+    <button class="btn-share" bindtap="sharePromotion">分享推广</button>
+  </view>
+</view>
+

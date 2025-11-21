@@ -93,7 +93,7 @@ Page({
       return;
     }
     wx.navigateTo({
-      url: '/pages/farmer/publish-demand/publish-demand',
+      url: '/farmer/pages/publish-demand/publish-demand',
     });
   },
 
@@ -102,9 +102,18 @@ Page({
    */
   viewOrderDetail(e: any) {
     const orderId = e.currentTarget.dataset.orderId;
-    wx.navigateTo({
-      url: `/pages/farmer/order-detail/order-detail?orderId=${orderId}`,
-    });
+    const userInfo = this.data.userInfo;
+    
+    // 根据角色跳转到对应的订单详情页
+    if (userInfo.role === 'farmer') {
+      wx.navigateTo({
+        url: `/farmer/pages/order-detail/order-detail?orderId=${orderId}`,
+      });
+    } else if (userInfo.role === 'contractor') {
+      wx.navigateTo({
+        url: `/contractor/pages/order-detail/order-detail?orderId=${orderId}`,
+      });
+    }
   },
 });
 

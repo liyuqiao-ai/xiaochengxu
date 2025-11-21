@@ -7,8 +7,10 @@ Page({
     orderId: '',
     order: null as any,
     quotePrice: 0,
+    suggestedPrice: 0, // 智能报价建议
     pricingMode: 'piece' as 'piece' | 'daily' | 'monthly',
     loading: false,
+    quoteHistory: [] as any[], // 报价历史
   },
 
   onLoad(options: any) {
@@ -44,6 +46,12 @@ Page({
         order,
         pricingMode: order.pricingMode,
       });
+
+      // 计算智能报价建议
+      this.calculateSuggestedPrice(order);
+
+      // 加载报价历史（如果有）
+      this.loadQuoteHistory();
 
       wx.hideLoading();
     } catch (error) {
@@ -127,6 +135,52 @@ Page({
         icon: 'none',
       });
     }
+  },
+
+  /**
+   * 计算智能报价建议
+   */
+  calculateSuggestedPrice(order: any) {
+    // 基于历史数据或市场价格的简单建议
+    // 这里可以根据实际业务逻辑优化
+    let suggested = 0;
+
+    if (order.pricingMode === 'piece') {
+      // 记件模式：根据工种和单位给出建议单价
+      const basePrice: Record<string, number> = {
+        harvest: 50, // 收割：50元/亩
+        plant: 40,    // 种植：40元/亩
+        fertilize: 30, // 施肥：30元/亩
+        pesticide: 35, // 打药：35元/亩
+        weeding: 25,   // 除草：25元/亩
+        management: 0,
+      };
+      suggested = basePrice[order.jobType] || 30;
+    } else if (order.pricingMode === 'daily') {
+      // 按天模式：建议日薪
+      suggested = 150; // 150元/人/天
+    } else if (order.pricingMode === 'monthly') {
+      // 包月模式：建议月薪
+      suggested = 3000; // 3000元/人/月
+    }
+
+    this.setData({ suggestedPrice: suggested });
+  },
+
+  /**
+   * 加载报价历史
+   */
+  async loadQuoteHistory() {
+    // TODO: 可以调用云函数获取历史报价数据
+    // 用于参考和对比
+    this.setData({ quoteHistory: [] });
+  },
+
+  /**
+   * 使用建议价格
+   */
+  useSuggestedPrice() {
+    this.setData({ quotePrice: this.data.suggestedPrice });
   },
 
   /**
