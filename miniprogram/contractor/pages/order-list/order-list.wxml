@@ -1,16 +1,28 @@
 <view class="container">
   <!-- 筛选栏 -->
-  <view class="filter-bar">
-    <picker mode="selector" range="{{jobTypes}}" range-key="name" value="{{jobTypeIndex}}" bindchange="filterJobType">
-      <view class="filter-item">
-        <text>工种：{{jobTypes[jobTypeIndex].name}}</text>
-      </view>
-    </picker>
-    <picker mode="selector" range="{{pricingModes}}" range-key="name" value="{{pricingModeIndex}}" bindchange="filterPricingMode">
-      <view class="filter-item">
-        <text>计价：{{pricingModes[pricingModeIndex].name}}</text>
-      </view>
-    </picker>
+  <view class="filter-section">
+    <view class="filter-group">
+      <text class="filter-label">工种筛选:</text>
+      <picker mode="selector" range="{{jobTypes}}" range-key="name" value="{{jobTypeIndex}}" bindchange="onJobTypeChange">
+        <view class="picker">{{jobTypes[jobTypeIndex]?.name || '全部工种'}}</view>
+      </picker>
+    </view>
+    
+    <view class="filter-group">
+      <text class="filter-label">距离排序:</text>
+      <picker mode="selector" range="{{distanceOptions}}" value="{{distanceIndex}}" bindchange="onDistanceChange">
+        <view class="picker">{{distanceOptions[distanceIndex]}}</view>
+      </picker>
+    </view>
+    
+    <view class="filter-group">
+      <text class="filter-label">价格范围:</text>
+      <picker mode="selector" range="{{priceRanges}}" value="{{priceIndex}}" bindchange="onPriceChange">
+        <view class="picker">{{priceRanges[priceIndex]}}</view>
+      </picker>
+    </view>
+    
+    <button class="btn-clear" size="mini" bindtap="clearFilters">清除筛选</button>
   </view>
 
   <!-- 订单列表 -->

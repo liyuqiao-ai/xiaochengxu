@@ -79,8 +79,12 @@
     </view>
   </view>
 
-  <view class="submit-section">
-    <button class="submit-btn" bindtap="submitDemand">发布需求</button>
+  <view class="form-actions">
+    <button class="btn-draft" bindtap="saveDraft">保存草稿</button>
+    <button class="btn-preview" bindtap="previewDemand">需求预览</button>
+    <button class="btn-submit" bindtap="submitDemand" disabled="{{submitting}}">
+      {{submitting ? '提交中...' : '发布需求'}}
+    </button>
   </view>
 </view>
 

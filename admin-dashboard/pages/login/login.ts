@@ -68,7 +68,7 @@ Page({
 
       if (result.result.success) {
         wx.setStorageSync('adminToken', result.result.token);
-        wx.setStorageSync('adminInfo', result.result.adminInfo);
+        wx.setStorageSync('adminUser', result.result.admin);
 
         wx.showToast({
           title: '登录成功',

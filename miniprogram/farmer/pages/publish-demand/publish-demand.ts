@@ -36,6 +36,7 @@ Page({
       // 包月模式
       estimatedMonths: 1,
     },
+    submitting: false,
   },
 
   onLoad() {
@@ -238,6 +239,8 @@ Page({
     }
 
     try {
+      this.setData({ submitting: true });
+
       // 获取用户信息
       const userInfo = wx.getStorageSync('userInfo');
       if (!userInfo || userInfo.role !== 'farmer') {
@@ -245,6 +248,7 @@ Page({
           title: '只有农户可以发布需求',
           icon: 'none',
         });
+        this.setData({ submitting: false });
         return;
       }
 
@@ -256,9 +260,12 @@ Page({
         },
       });
 
+      this.setData({ submitting: false });
+
       if (result.result.success) {
         wx.showToast({
           title: '发布成功',
+          icon: 'success',
         });
         setTimeout(() => {
           wx.navigateBack();
@@ -270,12 +277,59 @@ Page({
         });
       }
     } catch (error) {
+      this.setData({ submitting: false });
       console.error('发布需求失败:', error);
       wx.showToast({
         title: '发布失败',
         icon: 'none',
       });
     }
+  },
+
+  /**
+   * 保存草稿
+   */
+  saveDraft() {
+    const demandData = this.prepareDemandData();
+    if (demandData) {
+      wx.setStorageSync('demandDraft', demandData);
+      wx.showToast({
+        title: '草稿已保存',
+        icon: 'success',
+      });
+    } else {
+      wx.showToast({
+        title: '请先填写需求信息',
+        icon: 'none',
+      });
+    }
+  },
+
+  /**
+   * 需求预览
+   */
+  previewDemand() {
+    const demandData = this.prepareDemandData();
+    if (!demandData) {
+      wx.showToast({
+        title: '请先填写需求信息',
+        icon: 'none',
+      });
+      return;
+    }
+
+    // 显示预览信息
+    const previewText = `
+工种：${this.data.jobTypes.find(j => j.value === demandData.jobType)?.name}
+计价：${this.data.pricingModes.find(p => p.value === demandData.pricingMode)?.name}
+地点：${demandData.location.address}
+    `.trim();
+
+    wx.showModal({
+      title: '需求预览',
+      content: previewText,
+      showCancel: false,
+    });
   },
 
   /**

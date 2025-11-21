@@ -9,6 +9,10 @@ Page({
     loading: false,
     tabs: ['团队成员', '入队申请'],
     activeTab: 0,
+    teamStats: {
+      totalMembers: 0,
+      pendingRequests: 0,
+    },
   },
 
   onLoad() {
@@ -45,8 +49,10 @@ Page({
         });
 
         if (result.result.success) {
+          const members = result.result.data?.members || [];
           this.setData({
-            teamMembers: result.result.data?.members || [],
+            teamMembers: members,
+            'teamStats.totalMembers': members.length,
             loading: false,
           });
         }
@@ -58,8 +64,10 @@ Page({
         });
 
         if (result.result.success) {
+          const requests = result.result.data?.requests || [];
           this.setData({
-            pendingRequests: result.result.data?.requests || [],
+            pendingRequests: requests,
+            'teamStats.pendingRequests': requests.length,
             loading: false,
           });
         }
@@ -253,6 +261,88 @@ Page({
    * 查看团队统计
    */
   viewTeamStats() {
+    wx.showToast({
+      title: '功能开发中',
+      icon: 'none',
+    });
+  },
+
+  /**
+   * 扫码添加工人
+   */
+  scanAddMember() {
+    wx.scanCode({
+      success: async (res) => {
+        const content = res.result;
+        if (!content.startsWith('worker:')) {
+          wx.showToast({
+            title: '无效的二维码',
+            icon: 'none',
+          });
+          return;
+        }
+
+        const workerId = content.replace('worker:', '');
+        try {
+          wx.showLoading({ title: '添加中...' });
+          const result = await wx.cloud.callFunction({
+            name: 'addTeamMember',
+            data: { workerId },
+          });
+          wx.hideLoading();
+
+          if (result.result.success) {
+            wx.showToast({ title: '添加成功', icon: 'success' });
+            this.loadData();
+          } else {
+            wx.showToast({
+              title: result.result.error || '添加失败',
+              icon: 'none',
+            });
+          }
+        } catch (error) {
+          wx.hideLoading();
+          wx.showToast({ title: '添加失败', icon: 'none' });
+        }
+      },
+    });
+  },
+
+  /**
+   * 同意申请
+   */
+  async approveRequest(e: any) {
+    const requestId = e.currentTarget.dataset.requestId;
+    await this.reviewRequest({
+      currentTarget: {
+        dataset: {
+          requestId,
+          action: 'approve',
+        },
+      },
+    });
+  },
+
+  /**
+   * 拒绝申请
+   */
+  async rejectRequest(e: any) {
+    const requestId = e.currentTarget.dataset.requestId;
+    await this.reviewRequest({
+      currentTarget: {
+        dataset: {
+          requestId,
+          action: 'reject',
+        },
+      },
+    });
+  },
+
+  /**
+   * 分配任务
+   */
+  assignTask(e: any) {
+    const memberId = e.currentTarget.dataset.memberId;
     wx.showToast({
       title: '功能开发中',
       icon: 'none',

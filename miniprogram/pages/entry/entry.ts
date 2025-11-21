@@ -8,7 +8,16 @@ Page({
   },
 
   onLoad() {
-    this.loadUserInfo();
+    const userInfo = wx.getStorageSync('userInfo');
+    const token = wx.getStorageSync('token');
+
+    if (userInfo && token) {
+      // 已登录用户直接跳转到对应角色工作台
+      this.setData({ userInfo });
+      this.redirectToRole(userInfo.role);
+    } else {
+      this.loadUserInfo();
+    }
   },
 
   /**
@@ -77,11 +86,11 @@ Page({
     // 验证用户是否登录
     if (!userInfo) {
       wx.showModal({
-        title: '提示',
-        content: '请先登录',
+        title: '权限提示',
+        content: `您当前的角色是未登录，无法访问${this.getRoleName(role)}端`,
         showCancel: false,
         success: () => {
-          wx.reLaunch({
+          wx.navigateTo({
             url: '/pages/login/login',
           });
         },
@@ -91,48 +100,39 @@ Page({
 
     // 验证用户角色权限
     if (userInfo.role && userInfo.role !== role) {
-      const roleNames: Record<string, string> = {
-        farmer: '农户',
-        contractor: '工头',
-        worker: '工人',
-        introducer: '介绍方',
-      };
       wx.showModal({
         title: '权限提示',
-        content: `您的账户角色为${roleNames[userInfo.role] || userInfo.role}，无法访问${roleNames[role] || role}端功能`,
+        content: `您当前的角色是${this.getRoleName(userInfo.role)}，无法访问${this.getRoleName(role)}端`,
         showCancel: false,
+        success: () => {
+          wx.navigateTo({
+            url: '/pages/login/login',
+          });
+        },
       });
       return;
     }
 
-    // 严格按照多subPackages架构跳转
-    const roleRoutes: Record<string, string> = {
-      farmer: '/farmer/pages/index/index',
-      contractor: '/contractor/pages/index/index',
-      worker: '/worker/pages/index/index',
-      introducer: '/introducer/pages/index/index',
-    };
-
-    const route = roleRoutes[role];
-    if (!route) {
-      wx.showToast({
-        title: '无效的角色',
-        icon: 'none',
-      });
-      return;
-    }
-
-    // 使用reLaunch确保完全跳转到subPackage
-    wx.reLaunch({
-      url: route,
-      fail: (err) => {
-        console.error('跳转失败:', err);
+    // 根据角色跳转到对应工作台
+    switch (role) {
+      case 'farmer':
+        wx.reLaunch({ url: '/farmer/pages/index/index' });
+        break;
+      case 'worker':
+        wx.reLaunch({ url: '/worker/pages/index/index' });
+        break;
+      case 'contractor':
+        wx.reLaunch({ url: '/contractor/pages/index/index' });
+        break;
+      case 'introducer':
+        wx.reLaunch({ url: '/introducer/pages/index/index' });
+        break;
+      default:
         wx.showToast({
-          title: '跳转失败，请重试',
+          title: '无效的角色',
           icon: 'none',
         });
-      },
-    });
+    }
   },
 
   /**

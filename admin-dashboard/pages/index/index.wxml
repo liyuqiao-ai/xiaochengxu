@@ -1,34 +1,54 @@
-<view class="container">
-  <view class="header">
-    <text class="title">数据概览</text>
-    <text class="subtitle">实时监控平台数据</text>
-  </view>
-
-  <!-- 数据统计卡片 -->
-  <view class="stats-cards">
+<view class="admin-dashboard">
+  <view class="stats-overview">
     <view class="stat-card" bindtap="navigateToUsers">
       <text class="stat-number">{{stats.totalUsers}}</text>
       <text class="stat-label">总用户数</text>
+      <text class="stat-trend">↑ {{stats.userGrowth || 0}}%</text>
     </view>
+    
     <view class="stat-card" bindtap="navigateToOrders">
       <text class="stat-number">{{stats.activeOrders}}</text>
       <text class="stat-label">进行中订单</text>
+      <text class="stat-trend">{{stats.orderCompletion || 0}}% 完成率</text>
     </view>
+    
     <view class="stat-card" bindtap="navigateToFinance">
       <text class="stat-number">{{stats.todayIncome}}</text>
-      <text class="stat-label">今日平台收入(元)</text>
-    </view>
-    <view class="stat-card">
-      <text class="stat-number">{{stats.pendingReviews}}</text>
-      <text class="stat-label">待审核事项</text>
+      <text class="stat-label">今日平台收入</text>
+      <text class="stat-trend">¥ {{stats.totalIncome || 0}}</text>
     </view>
   </view>
 
-  <!-- 快捷操作 -->
   <view class="quick-actions">
-    <button class="action-btn" bindtap="navigateToUsers">用户管理</button>
-    <button class="action-btn" bindtap="navigateToOrders">订单监控</button>
-    <button class="action-btn" bindtap="navigateToFinance">财务管理</button>
+    <button class="action-btn" bindtap="navigateToUsers">
+      <text class="icon">👥</text>
+      <text>用户管理</text>
+    </button>
+    <button class="action-btn" bindtap="navigateToOrders">
+      <text class="icon">📋</text>
+      <text>订单监控</text>
+    </button>
+    <button class="action-btn" bindtap="navigateToFinance">
+      <text class="icon">💰</text>
+      <text>财务管理</text>
+    </button>
+    <button class="action-btn" bindtap="navigateToSystem">
+      <text class="icon">⚙️</text>
+      <text>系统配置</text>
+    </button>
+  </view>
+
+  <view class="recent-activities">
+    <text class="section-title">最近活动</text>
+    <view class="activity-list">
+      <view class="activity-item" wx:for="{{recentActivities}}" wx:key="id">
+        <text class="activity-time">{{item.time}}</text>
+        <text class="activity-content">{{item.content}}</text>
+      </view>
+      <view class="empty" wx:if="{{recentActivities.length === 0}}">
+        暂无活动记录
+      </view>
+    </view>
   </view>
 </view>
 

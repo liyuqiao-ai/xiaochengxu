@@ -86,54 +86,53 @@ Page({
     try {
       this.setData({ loading: true });
 
-      // 获取我的订单
-      const result = await wx.cloud.callFunction({
-        name: 'getMyOrders',
-        data: {},
-      });
+      // 并行加载所有数据
+      const [ordersResult, quotesResult, statsResult] = await Promise.all([
+        wx.cloud.callFunction({
+          name: 'getMyOrders',
+          data: {},
+        }).catch(() => ({ result: { success: false, data: { orders: [] } } })),
+        wx.cloud.callFunction({
+          name: 'getPendingQuotes',
+          data: { farmerId: userInfo._id },
+        }).catch(() => ({ result: { success: false, data: { quotes: [] } } })),
+        wx.cloud.callFunction({
+          name: 'getFarmerStats',
+          data: { farmerId: userInfo._id },
+        }).catch(() => ({ result: { success: false, data: { stats: {} } } })),
+      ]);
 
-      if (result.result.success) {
-        const orders = result.result.data?.orders || [];
-        
-        // 分类订单
-        const pendingOrders = orders.filter(
-          (o: any) => o.status === 'pending' || o.status === 'quoted'
-        );
-        const inProgressOrders = orders.filter(
-          (o: any) => o.status === 'confirmed' || o.status === 'in_progress'
-        );
+      const orders = ordersResult.result.data?.orders || [];
+      
+      // 分类订单
+      const pendingOrders = orders.filter(
+        (o: any) => o.status === 'pending' || o.status === 'quoted'
+      );
+      const inProgressOrders = orders.filter(
+        (o: any) => o.status === 'confirmed' || o.status === 'in_progress'
+      );
 
-        // 统计待处理报价
-        const pendingQuotes = orders.filter(
-          (o: any) => o.status === 'quoted'
-        ).length;
+      // 统计待处理报价
+      const pendingQuotes = quotesResult.result.data?.quotes?.length || 
+        orders.filter((o: any) => o.status === 'quoted').length;
 
-        // 统计已完成订单
-        const completedOrders = orders.filter(
-          (o: any) => o.status === 'completed'
-        ).length;
+      // 统计已完成订单
+      const completedOrders = orders.filter(
+        (o: any) => o.status === 'completed'
+      ).length;
 
-        this.setData({
-          pendingOrders,
-          inProgressOrders,
+      this.setData({
+        pendingOrders,
+        inProgressOrders,
+        pendingQuotes,
+        stats: statsResult.result.data?.stats || {
+          totalOrders: orders.length,
           pendingQuotes,
-          stats: {
-            totalOrders: orders.length,
-            pendingQuotes,
-            activeOrders: inProgressOrders.length,
-            completedOrders,
-          },
-          loading: false,
-        });
-      } else {
-        // 即使失败也显示空状态
-        this.setData({
-          pendingOrders: [],
-          inProgressOrders: [],
-          pendingQuotes: 0,
-          loading: false,
-        });
-      }
+          activeOrders: inProgressOrders.length,
+          completedOrders,
+        },
+        loading: false,
+      });
     } catch (error) {
       console.error('加载数据失败:', error);
       // 出错时也显示空状态
@@ -142,6 +141,58 @@ Page({
         inProgressOrders: [],
         pendingQuotes: 0,
         loading: false,
+      });
+      wx.showToast({
+        title: '加载失败',
+        icon: 'none',
+      });
+    }
+  },
+
+  /**
+   * 刷新数据
+   */
+  async refreshData() {
+    await this.loadData();
+    wx.showToast({
+      title: '刷新成功',
+      icon: 'success',
+    });
+  },
+
+  /**
+   * 联系客服
+   */
+  contactSupport() {
+    wx.showModal({
+      title: '联系客服',
+      content: '客服电话：400-xxx-xxxx\n工作时间：9:00-18:00',
+      showCancel: true,
+      confirmText: '拨打',
+      success: (res) => {
+        if (res.confirm) {
+          wx.makePhoneCall({
+            phoneNumber: '400-xxx-xxxx',
+          });
+        }
+      },
+    });
+  },
+
+  /**
+   * 查看进行中订单
+   */
+  viewActiveOrders() {
+    if (this.data.stats.activeOrders > 0) {
+      // 可以跳转到进行中订单列表
+      wx.showToast({
+        title: '功能开发中',
+        icon: 'none',
+      });
+    } else {
+      wx.showToast({
+        title: '暂无进行中订单',
+        icon: 'none',
       });
     }
   },

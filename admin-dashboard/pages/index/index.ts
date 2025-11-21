@@ -9,8 +9,12 @@ Page({
       activeOrders: 0,
       todayIncome: 0,
       pendingReviews: 0,
+      userGrowth: 0,
+      orderCompletion: 0,
+      totalIncome: 0,
     },
     loading: false,
+    recentActivities: [] as any[],
   },
 
   onLoad() {
@@ -45,8 +49,10 @@ Page({
       });
 
       if (result.result.success) {
+        const data = result.result.data || {};
         this.setData({
-          stats: result.result.data?.stats || this.data.stats,
+          stats: data.stats || this.data.stats,
+          recentActivities: data.recentActivities || [],
           loading: false,
         });
       } else {
@@ -90,6 +96,15 @@ Page({
   navigateToFinance() {
     wx.navigateTo({
       url: '/admin-dashboard/pages/finance/finance',
+    });
+  },
+
+  /**
+   * 跳转到系统配置
+   */
+  navigateToSystem() {
+    wx.navigateTo({
+      url: '/admin-dashboard/pages/system/system',
     });
   },
 });

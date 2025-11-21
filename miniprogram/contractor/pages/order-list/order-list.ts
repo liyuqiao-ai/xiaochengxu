@@ -10,10 +10,11 @@ Page({
       jobType: '',
       pricingMode: '',
       maxDistance: 50, // 最大距离（公里）
+      priceRange: '', // 价格范围
     },
     location: null as any,
     jobTypes: [
-      { value: '', name: '全部' },
+      { value: '', name: '全部工种' },
       { value: 'harvest', name: '收割' },
       { value: 'plant', name: '种植' },
       { value: 'fertilize', name: '施肥' },
@@ -29,6 +30,10 @@ Page({
       { value: 'monthly', name: '包月' },
     ],
     pricingModeIndex: 0,
+    distanceOptions: ['距离最近', '距离最远', '时间最新', '时间最早'],
+    distanceIndex: 0,
+    priceRanges: ['全部', '0-1000元', '1000-5000元', '5000-10000元', '10000元以上'],
+    priceIndex: 0,
   },
 
   onLoad() {
@@ -110,7 +115,7 @@ Page({
   /**
    * 筛选工种
    */
-  filterJobType(e: any) {
+  onJobTypeChange(e: any) {
     const index = parseInt(e.detail.value);
     const jobType = this.data.jobTypes[index].value;
     this.setData({
@@ -121,16 +126,91 @@ Page({
   },
 
   /**
-   * 筛选计价模式
+   * 距离排序
    */
-  filterPricingMode(e: any) {
+  onDistanceChange(e: any) {
     const index = parseInt(e.detail.value);
-    const pricingMode = this.data.pricingModes[index].value;
     this.setData({
-      pricingModeIndex: index,
-      'filters.pricingMode': pricingMode,
+      distanceIndex: index,
+    });
+    // 根据选择排序
+    this.sortOrders();
+  },
+
+  /**
+   * 价格筛选
+   */
+  onPriceChange(e: any) {
+    const index = parseInt(e.detail.value);
+    this.setData({
+      priceIndex: index,
+    });
+    // 解析价格范围
+    const priceRange = this.data.priceRanges[index];
+    this.setData({
+      'filters.priceRange': priceRange,
     });
     this.loadOrders();
+  },
+
+  /**
+   * 清除筛选
+   */
+  clearFilters() {
+    this.setData({
+      jobTypeIndex: 0,
+      pricingModeIndex: 0,
+      distanceIndex: 0,
+      priceIndex: 0,
+      filters: {
+        jobType: '',
+        pricingMode: '',
+        maxDistance: 50,
+        priceRange: '',
+      },
+    });
+    this.loadOrders();
+  },
+
+  /**
+   * 排序订单
+   */
+  sortOrders() {
+    const { orders, distanceIndex } = this.data;
+    let sortedOrders = [...orders];
+
+    switch (distanceIndex) {
+      case 0: // 距离最近
+        sortedOrders.sort((a: any, b: any) => {
+          const distA = a.distance || 999999;
+          const distB = b.distance || 999999;
+          return distA - distB;
+        });
+        break;
+      case 1: // 距离最远
+        sortedOrders.sort((a: any, b: any) => {
+          const distA = a.distance || 0;
+          const distB = b.distance || 0;
+          return distB - distA;
+        });
+        break;
+      case 2: // 时间最新
+        sortedOrders.sort((a: any, b: any) => {
+          const timeA = new Date(a.timeline.createdAt).getTime();
+          const timeB = new Date(b.timeline.createdAt).getTime();
+          return timeB - timeA;
+        });
+        break;
+      case 3: // 时间最早
+        sortedOrders.sort((a: any, b: any) => {
+          const timeA = new Date(a.timeline.createdAt).getTime();
+          const timeB = new Date(b.timeline.createdAt).getTime();
+          return timeA - timeB;
+        });
+        break;
+    }
+
+    this.setData({ orders: sortedOrders });
   },
 
   /**
