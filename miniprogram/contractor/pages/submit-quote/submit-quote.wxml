@@ -1,0 +1,65 @@
+<view class="container">
+  <view class="order-info-section">
+    <view class="section-title">订单信息</view>
+    <view class="info-item" wx:if="{{order}}">
+      <text class="label">工种类型：</text>
+      <text class="value">{{order.jobType}}</text>
+    </view>
+    <view class="info-item" wx:if="{{order}}">
+      <text class="label">工作地点：</text>
+      <text class="value">{{order.location.address}}</text>
+    </view>
+    <view class="info-item" wx:if="{{order && order.pricingMode === 'piece'}}">
+      <text class="label">计价模式：</text>
+      <text class="value">记件（{{order.pieceInfo.unit}}）</text>
+    </view>
+    <view class="info-item" wx:if="{{order && order.pricingMode === 'daily'}}">
+      <text class="label">计价模式：</text>
+      <text class="value">按天（{{order.dailyInfo.estimatedWorkers}}人 × {{order.dailyInfo.estimatedDays}}天）</text>
+    </view>
+    <view class="info-item" wx:if="{{order && order.pricingMode === 'monthly'}}">
+      <text class="label">计价模式：</text>
+      <text class="value">包月（{{order.monthlyInfo.estimatedWorkers}}人 × {{order.monthlyInfo.estimatedMonths}}月）</text>
+    </view>
+  </view>
+
+  <view class="quote-section">
+    <view class="section-title">报价信息</view>
+    
+    <view class="form-item">
+      <text class="label">报价金额（元）</text>
+      <input
+        class="input"
+        type="digit"
+        placeholder="请输入报价金额"
+        value="{{quotePrice}}"
+        bindinput="onQuotePriceInput"
+      />
+    </view>
+
+    <view class="tips">
+      <text>💡 提示：</text>
+      <text wx:if="{{order && order.pricingMode === 'piece'}}">
+        记件模式请输入单价（元/{{order.pieceInfo.unit}}）
+      </text>
+      <text wx:if="{{order && order.pricingMode === 'daily'}}">
+        按天模式请输入日薪（元/人/天）
+      </text>
+      <text wx:if="{{order && order.pricingMode === 'monthly'}}">
+        包月模式请输入月薪（元/人/月）
+      </text>
+    </view>
+  </view>
+
+  <view class="submit-section">
+    <button
+      class="submit-btn"
+      bindtap="submitQuote"
+      disabled="{{loading}}"
+      loading="{{loading}}"
+    >
+      {{loading ? '提交中...' : '提交报价'}}
+    </button>
+  </view>
+</view>
+

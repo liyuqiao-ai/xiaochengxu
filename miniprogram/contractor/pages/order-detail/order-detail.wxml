@@ -1,0 +1,130 @@
+<view class="container">
+  <view class="order-header" wx:if="{{order}}">
+    <view class="status-badge {{order.status}}">
+      {{getStatusText(order.status)}}
+    </view>
+    <text class="job-type">{{order.jobType}}</text>
+  </view>
+
+  <!-- 订单基本信息 -->
+  <view class="section" wx:if="{{order}}">
+    <view class="section-title">订单信息</view>
+    <view class="info-item">
+      <text class="label">订单编号</text>
+      <text class="value">{{order._id}}</text>
+    </view>
+    <view class="info-item">
+      <text class="label">工种类型</text>
+      <text class="value">{{order.jobType}}</text>
+    </view>
+    <view class="info-item">
+      <text class="label">计价模式</text>
+      <text class="value">
+        <text wx:if="{{order.pricingMode === 'piece'}}">记件</text>
+        <text wx:if="{{order.pricingMode === 'daily'}}">按天</text>
+        <text wx:if="{{order.pricingMode === 'monthly'}}">包月</text>
+      </text>
+    </view>
+    <view class="info-item" bindtap="viewLocation">
+      <text class="label">工作地点</text>
+      <text class="value location">{{order.location.address}} ></text>
+    </view>
+  </view>
+
+  <!-- 计价信息 -->
+  <view class="section" wx:if="{{order && order.pricingMode === 'piece'}}">
+    <view class="section-title">记件信息</view>
+    <view class="info-item">
+      <text class="label">单位</text>
+      <text class="value">{{order.pieceInfo.unit}}</text>
+    </view>
+    <view class="info-item">
+      <text class="label">预估数量</text>
+      <text class="value">{{order.pieceInfo.estimatedQuantity}}</text>
+    </view>
+    <view class="info-item" wx:if="{{order.pieceInfo.unitPrice}}">
+      <text class="label">报价单价</text>
+      <text class="value price">{{formatAmount(order.pieceInfo.unitPrice)}} 元</text>
+    </view>
+  </view>
+
+  <view class="section" wx:if="{{order && order.pricingMode === 'daily'}}">
+    <view class="section-title">按天信息</view>
+    <view class="info-item">
+      <text class="label">预估用工人数</text>
+      <text class="value">{{order.dailyInfo.estimatedWorkers}} 人</text>
+    </view>
+    <view class="info-item">
+      <text class="label">预估天数</text>
+      <text class="value">{{order.dailyInfo.estimatedDays}} 天</text>
+    </view>
+    <view class="info-item" wx:if="{{order.dailyInfo.dailySalary}}">
+      <text class="label">报价日薪</text>
+      <text class="value price">{{formatAmount(order.dailyInfo.dailySalary)}} 元/人/天</text>
+    </view>
+  </view>
+
+  <view class="section" wx:if="{{order && order.pricingMode === 'monthly'}}">
+    <view class="section-title">包月信息</view>
+    <view class="info-item">
+      <text class="label">预估用工人数</text>
+      <text class="value">{{order.monthlyInfo.estimatedWorkers}} 人</text>
+    </view>
+    <view class="info-item">
+      <text class="label">预估月数</text>
+      <text class="value">{{order.monthlyInfo.estimatedMonths}} 月</text>
+    </view>
+    <view class="info-item" wx:if="{{order.monthlyInfo.monthlySalary}}">
+      <text class="label">报价月薪</text>
+      <text class="value price">{{formatAmount(order.monthlyInfo.monthlySalary)}} 元/人/月</text>
+    </view>
+  </view>
+
+  <!-- 财务信息 -->
+  <view class="section" wx:if="{{order && order.financials}}">
+    <view class="section-title">财务信息</view>
+    <view class="info-item">
+      <text class="label">基础劳务费</text>
+      <text class="value price">{{formatAmount(order.financials.baseAmount)}} 元</text>
+    </view>
+    <view class="info-item">
+      <text class="label">平台服务费</text>
+      <text class="value">{{formatAmount(order.financials.platformFee)}} 元</text>
+    </view>
+    <view class="info-item">
+      <text class="label">工头实收</text>
+      <text class="value price large">{{formatAmount(order.financials.contractorIncome)}} 元</text>
+    </view>
+  </view>
+
+  <!-- 时间轴 -->
+  <view class="section" wx:if="{{order}}">
+    <view class="section-title">时间轴</view>
+    <view class="timeline-item">
+      <text class="timeline-label">创建时间</text>
+      <text class="timeline-value">{{formatDate(order.timeline.createdAt)}}</text>
+    </view>
+    <view class="timeline-item" wx:if="{{order.timeline.quotedAt}}">
+      <text class="timeline-label">报价时间</text>
+      <text class="timeline-value">{{formatDate(order.timeline.quotedAt)}}</text>
+    </view>
+    <view class="timeline-item" wx:if="{{order.timeline.confirmedAt}}">
+      <text class="timeline-label">确认时间</text>
+      <text class="timeline-value">{{formatDate(order.timeline.confirmedAt)}}</text>
+    </view>
+    <view class="timeline-item" wx:if="{{order.timeline.startedAt}}">
+      <text class="timeline-label">开始时间</text>
+      <text class="timeline-value">{{formatDate(order.timeline.startedAt)}}</text>
+    </view>
+    <view class="timeline-item" wx:if="{{order.timeline.completedAt}}">
+      <text class="timeline-label">完成时间</text>
+      <text class="timeline-value">{{formatDate(order.timeline.completedAt)}}</text>
+    </view>
+  </view>
+
+  <!-- 操作按钮 -->
+  <view class="action-section" wx:if="{{order && order.status === 'pending'}}">
+    <button class="action-btn primary" bindtap="startQuote">立即报价</button>
+  </view>
+</view>
+

@@ -2,7 +2,9 @@
   "pages": [
     "pages/index/index",
     "pages/login/login",
-    "contractor/pages/index/index"
+    "contractor/pages/index/index",
+    "contractor/pages/order-detail/order-detail",
+    "contractor/pages/submit-quote/submit-quote"
   ],
   "window": {
     "backgroundTextStyle": "light",
