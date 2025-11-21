@@ -25,21 +25,29 @@ async function sendSubscribeMessage(openid: string, templateId: string, data: an
     // 注意：需要在小程序端先调用wx.requestSubscribeMessage获取用户授权
     // 这里只是发送逻辑，实际使用时需要确保用户已授权
     
-    // 如果配置了订阅消息模板ID，可以发送
-    // 这里简化处理，实际需要根据通知类型选择对应的模板ID
-    console.log('发送订阅消息:', { openid, templateId, data, page });
-    
-    // TODO: 实际发送订阅消息
-    // await cloud.openapi.subscribeMessage.send({
-    //   touser: openid,
-    //   template_id: templateId,
-    //   page: page || 'pages/index/index',
-    //   data: data,
-    // });
-    
-    return true;
-  } catch (error) {
+    if (!templateId) {
+      console.log('未配置模板ID，跳过订阅消息发送');
+      return false;
+    }
+
+    // 发送订阅消息
+    const result = await cloud.openapi.subscribeMessage.send({
+      touser: openid,
+      template_id: templateId,
+      page: page || 'pages/index/index',
+      data: data,
+    });
+
+    if (result.errCode === 0) {
+      console.log('订阅消息发送成功:', openid);
+      return true;
+    } else {
+      console.warn('订阅消息发送失败:', result.errMsg);
+      return false;
+    }
+  } catch (error: any) {
     console.error('发送订阅消息失败:', error);
+    // 订阅消息发送失败不影响主流程
     return false;
   }
 }
@@ -68,27 +76,93 @@ async function sendInAppNotification(target: string, type: string, data: any) {
 /**
  * 获取通知模板配置
  */
-function getNotificationTemplate(type: string): { templateId?: string; title: string; content: string } {
-  const templates: Record<string, { templateId?: string; title: string; content: string }> = {
+/**
+ * 获取通知模板配置
+ * 根据通知类型返回对应的模板ID、标题和内容
+ */
+function getNotificationTemplate(type: string): { 
+  templateId?: string; 
+  title: string; 
+  content: string;
+  page?: string;
+  subscribeData?: any;
+} {
+  const templates: Record<string, { 
+    templateId?: string; 
+    title: string; 
+    content: string;
+    page?: string;
+    subscribeData?: any;
+  }> = {
     new_demand: {
+      templateId: process.env.TEMPLATE_NEW_DEMAND || '', // 需要在环境变量中配置
       title: '新需求通知',
       content: '有新的工作需求，快去查看吧！',
+      page: 'contractor/pages/order-list/order-list',
+      subscribeData: {
+        thing1: { value: '新工作需求' },
+        thing2: { value: '有新的工作需求发布' },
+        time3: { value: new Date().toLocaleString('zh-CN') },
+      },
     },
     new_quote: {
+      templateId: process.env.TEMPLATE_NEW_QUOTE || '',
       title: '新报价通知',
       content: '有工头对您的订单进行了报价',
+      page: 'farmer/pages/quote-list/quote-list',
+      subscribeData: {
+        thing1: { value: '新报价' },
+        thing2: { value: '有工头对您的订单进行了报价' },
+        time3: { value: new Date().toLocaleString('zh-CN') },
+      },
     },
     quote_accepted: {
+      templateId: process.env.TEMPLATE_QUOTE_ACCEPTED || '',
       title: '报价被接受',
       content: '您的报价已被农户接受',
+      page: 'contractor/pages/order-detail/order-detail',
+      subscribeData: {
+        thing1: { value: '报价被接受' },
+        thing2: { value: '您的报价已被农户接受' },
+        time3: { value: new Date().toLocaleString('zh-CN') },
+      },
+    },
+    work_started: {
+      templateId: process.env.TEMPLATE_WORK_STARTED || '',
+      title: '工作已开始',
+      content: '订单工作已开始',
+      page: 'farmer/pages/order-detail/order-detail',
+      subscribeData: {
+        thing1: { value: '工作开始' },
+        thing2: { value: '订单工作已开始' },
+        time3: { value: new Date().toLocaleString('zh-CN') },
+      },
+    },
+    work_completed: {
+      templateId: process.env.TEMPLATE_WORK_COMPLETED || '',
+      title: '工作已完成',
+      content: '订单工作已完成',
+      page: 'farmer/pages/order-detail/order-detail',
+      subscribeData: {
+        thing1: { value: '工作完成' },
+        thing2: { value: '订单工作已完成' },
+        time3: { value: new Date().toLocaleString('zh-CN') },
+      },
+    },
+    payment_success: {
+      templateId: process.env.TEMPLATE_PAYMENT_SUCCESS || '',
+      title: '支付成功',
+      content: '订单支付成功',
+      page: 'farmer/pages/payment/payment',
+      subscribeData: {
+        thing1: { value: '支付成功' },
+        amount2: { value: '0.00' }, // 需要从data中获取
+        time3: { value: new Date().toLocaleString('zh-CN') },
+      },
     },
     quote_rejected: {
       title: '报价被拒绝',
       content: '您的报价已被农户拒绝',
-    },
-    work_started: {
-      title: '工作已开始',
-      content: '订单工作已开始',
     },
     progress_updated: {
       title: '进度更新',
@@ -105,6 +179,7 @@ function getNotificationTemplate(type: string): { templateId?: string; title: st
     team_request: {
       title: '入队申请',
       content: '有工人申请加入您的团队',
+      page: 'contractor/pages/team/team',
     },
     team_request_approved: {
       title: '入队申请通过',
@@ -183,14 +258,24 @@ export const main = async (event: any) => {
     }
 
     // 5. 发送订阅消息（如果配置了模板ID）
-    if (template.templateId) {
+    if (template.templateId && template.subscribeData) {
       for (const openid of openids) {
         try {
-          await sendSubscribeMessage(openid, template.templateId, {
-            thing1: { value: template.title },
-            thing2: { value: template.content },
-            time3: { value: new Date().toLocaleString('zh-CN') },
-          });
+          // 合并模板数据和业务数据
+          const subscribeData = {
+            ...template.subscribeData,
+            // 如果data中有金额，更新到subscribeData
+            ...(data.amount && { amount2: { value: (data.amount / 100).toFixed(2) } }),
+            // 如果data中有订单号，更新到subscribeData
+            ...(data.orderId && { thing4: { value: data.orderId } }),
+          };
+
+          await sendSubscribeMessage(
+            openid, 
+            template.templateId, 
+            subscribeData,
+            template.page
+          );
         } catch (error) {
           console.error(`发送订阅消息失败 [${openid}]:`, error);
         }
