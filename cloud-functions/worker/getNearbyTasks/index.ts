@@ -48,10 +48,46 @@ export const main = async (event: any) => {
       }
     );
 
-    // TODO: 根据地理位置筛选附近的任务
-    // 这里简化处理，返回所有进行中的订单
+    // 4. 根据地理位置筛选附近的任务
+    let nearbyOrders = orders;
 
-    return createSuccessResponse({ tasks: orders });
+    if (latitude && longitude) {
+      // 计算每个订单与用户位置的距离
+      const ordersWithDistance = orders.map((order: any) => {
+        if (!order.location || !order.location.lat || !order.location.lng) {
+          return { ...order, distance: Infinity };
+        }
+
+        // 使用Haversine公式计算两点间距离（单位：公里）
+        const R = 6371; // 地球半径（公里）
+        const dLat = ((order.location.lat - latitude) * Math.PI) / 180;
+        const dLon = ((order.location.lng - longitude) * Math.PI) / 180;
+        const a =
+          Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+          Math.cos((latitude * Math.PI) / 180) *
+            Math.cos((order.location.lat * Math.PI) / 180) *
+            Math.sin(dLon / 2) *
+            Math.sin(dLon / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        const distance = R * c;
+
+        return { ...order, distance };
+      });
+
+      // 按距离排序
+      ordersWithDistance.sort((a: any, b: any) => a.distance - b.distance);
+
+      // 筛选50公里内的任务（可根据需要调整）
+      const maxDistance = event.radius || 50000; // 默认50公里
+      nearbyOrders = ordersWithDistance.filter(
+        (order: any) => order.distance <= maxDistance / 1000
+      );
+    }
+
+    return createSuccessResponse({
+      tasks: nearbyOrders,
+      total: nearbyOrders.length,
+    });
   } catch (error: any) {
     console.error('获取附近任务失败:', error);
     return createErrorResponse(ErrorCode.UNKNOWN_ERROR, undefined, error.message);

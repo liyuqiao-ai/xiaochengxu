@@ -32,16 +32,49 @@ Page({
   getLocation() {
     wx.getLocation({
       type: 'gcj02',
-      success: (res) => {
+      success: async (res) => {
         // 逆地理编码获取地址
-        // TODO: 调用地图API获取详细地址
-        this.setData({
-          location: {
-            lat: res.latitude,
-            lng: res.longitude,
-            address: '正在获取地址...',
-          },
-        });
+        try {
+          // 使用腾讯地图API进行逆地理编码
+          // 注意：需要在小程序管理后台配置request合法域名
+          const mapKey = 'YOUR_TENCENT_MAP_KEY'; // 需要在配置中设置
+          const url = `https://apis.map.qq.com/ws/geocoder/v1/?location=${res.latitude},${res.longitude}&key=${mapKey}&get_poi=1`;
+
+          // 由于小程序限制，这里使用云函数调用
+          const result = await wx.cloud.callFunction({
+            name: 'reverseGeocode',
+            data: {
+              latitude: res.latitude,
+              longitude: res.longitude,
+            },
+          });
+
+          let address = '位置获取中...';
+          if (result.result.success && result.result.data?.address) {
+            address = result.result.data.address;
+          } else {
+            // 如果云函数调用失败，使用默认地址
+            address = `${res.latitude.toFixed(6)}, ${res.longitude.toFixed(6)}`;
+          }
+
+          this.setData({
+            location: {
+              lat: res.latitude,
+              lng: res.longitude,
+              address,
+            },
+          });
+        } catch (error) {
+          console.error('获取地址失败:', error);
+          // 如果获取地址失败，使用坐标作为地址
+          this.setData({
+            location: {
+              lat: res.latitude,
+              lng: res.longitude,
+              address: `${res.latitude.toFixed(6)}, ${res.longitude.toFixed(6)}`,
+            },
+          });
+        }
       },
       fail: () => {
         wx.showToast({
