@@ -17,15 +17,19 @@ declare namespace wx {
     result: any;
   }
 
+  interface CloudUploadFileOptions {
+    cloudPath: string;
+    filePath: string;
+  }
+
+  interface CloudUploadFileResult {
+    fileID: string;
+  }
+
   interface Cloud {
     init(options: CloudInitOptions): void;
     callFunction(options: CloudCallFunctionOptions): Promise<CloudCallFunctionResult>;
-    uploadFile(options: {
-      cloudPath: string;
-      filePath: string;
-    }): Promise<{
-      fileID: string;
-    }>;
+    uploadFile(options: CloudUploadFileOptions): Promise<CloudUploadFileResult>;
     getWXContext(): {
       OPENID: string;
       APPID: string;
@@ -65,21 +69,54 @@ declare namespace wx {
     success?: (res: { tapIndex: number }) => void;
     fail?: () => void;
   }): void;
-  function getLocation(options: {
+  interface GetLocationResult {
+    latitude: number;
+    longitude: number;
+    speed: number;
+    accuracy: number;
+  }
+
+  interface GetLocationOptions {
     type: 'wgs84' | 'gcj02';
     altitude?: boolean;
-    success?: (res: { latitude: number; longitude: number; speed: number; accuracy: number }) => void;
-    fail?: () => void;
-  }): Promise<{ latitude: number; longitude: number; speed: number; accuracy: number }>;
-  function getUserProfile(options: {
+    success?: (res: GetLocationResult) => void;
+    fail?: (err: any) => void;
+  }
+
+  function getLocation(options: GetLocationOptions): void;
+  function getLocation(options: Omit<GetLocationOptions, 'success' | 'fail'>): Promise<GetLocationResult>;
+  interface GetUserProfileResult {
+    userInfo: {
+      nickName: string;
+      avatarUrl: string;
+      gender: number;
+      country: string;
+      province: string;
+      city: string;
+      language: string;
+    };
+  }
+
+  interface GetUserProfileOptions {
     desc: string;
-    success?: (res: { userInfo: any }) => void;
-    fail?: () => void;
-  }): Promise<{ userInfo: any }>;
-  function login(options?: {
-    success?: (res: { code: string }) => void;
-    fail?: () => void;
-  }): Promise<{ code: string }>;
+    success?: (res: GetUserProfileResult) => void;
+    fail?: (err: any) => void;
+  }
+
+  function getUserProfile(options: GetUserProfileOptions): void;
+  function getUserProfile(options: Omit<GetUserProfileOptions, 'success' | 'fail'>): Promise<GetUserProfileResult>;
+
+  interface LoginResult {
+    code: string;
+  }
+
+  interface LoginOptions {
+    success?: (res: LoginResult) => void;
+    fail?: (err: any) => void;
+  }
+
+  function login(options?: LoginOptions): void;
+  function login(): Promise<LoginResult>;
   function stopPullDownRefresh(): void;
   function openLocation(options: {
     latitude: number;
@@ -95,6 +132,11 @@ declare namespace wx {
     success?: (res: { tempFilePaths: string[] }) => void;
     fail?: () => void;
   }): void;
+  function chooseImage(options: {
+    count?: number;
+    sizeType?: ('original' | 'compressed')[];
+    sourceType?: ('album' | 'camera')[];
+  }): Promise<{ tempFilePaths: string[] }>;
   function previewImage(options: {
     urls: string[];
     current?: string;
