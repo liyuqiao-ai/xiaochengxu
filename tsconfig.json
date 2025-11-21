@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "commonjs",
+    "lib": ["ES2020"],
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "moduleResolution": "node",
+    "declaration": true,
+    "outDir": "./dist",
+    "rootDir": "./",
+    "baseUrl": "./",
+    "paths": {
+      "@shared/*": ["shared/*"],
+      "@cloud-functions/*": ["cloud-functions/*"]
+    }
+  },
+  "include": ["shared/**/*", "cloud-functions/**/*"],
+  "exclude": ["node_modules", "dist", "miniprogram"]
+}
+

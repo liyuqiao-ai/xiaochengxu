@@ -1,0 +1,82 @@
+<view class="container">
+  <view class="form-section">
+    <view class="form-item">
+      <text class="label">工种类型</text>
+      <picker mode="selector" range="{{jobTypes}}" range-key="name" 
+              value="{{jobTypeIndex}}" bindchange="onJobTypeChange">
+        <view class="picker">
+          {{jobTypes[jobTypeIndex].name}}
+        </view>
+      </picker>
+    </view>
+
+    <view class="form-item">
+      <text class="label">计价模式</text>
+      <picker mode="selector" range="{{pricingModes}}" range-key="name"
+              value="{{pricingModeIndex}}" bindchange="onPricingModeChange">
+        <view class="picker">
+          {{pricingModes[pricingModeIndex].name}}
+        </view>
+      </picker>
+    </view>
+
+    <!-- 记件模式表单 -->
+    <block wx:if="{{pricingMode === 'piece'}}">
+      <view class="form-item">
+        <text class="label">单位</text>
+        <picker mode="selector" range="{{units}}" value="{{unitIndex}}" 
+                bindchange="onUnitChange">
+          <view class="picker">{{units[unitIndex]}}</view>
+        </picker>
+      </view>
+      <view class="form-item">
+        <text class="label">预估数量</text>
+        <input type="digit" placeholder="请输入预估数量" 
+               value="{{formData.estimatedQuantity}}" 
+               bindinput="onQuantityInput"/>
+      </view>
+    </block>
+
+    <!-- 按天模式表单 -->
+    <block wx:if="{{pricingMode === 'daily'}}">
+      <view class="form-item">
+        <text class="label">预估用工人数</text>
+        <input type="number" placeholder="请输入用工人数" 
+               value="{{formData.estimatedWorkers}}" 
+               bindinput="onWorkersInput"/>
+      </view>
+      <view class="form-item">
+        <text class="label">预估天数</text>
+        <input type="number" placeholder="请输入天数" 
+               value="{{formData.estimatedDays}}" 
+               bindinput="onDaysInput"/>
+      </view>
+    </block>
+
+    <!-- 包月模式表单 -->
+    <block wx:if="{{pricingMode === 'monthly'}}">
+      <view class="form-item">
+        <text class="label">预估用工人数</text>
+        <input type="number" placeholder="请输入用工人数" 
+               value="{{formData.estimatedWorkers}}" 
+               bindinput="onWorkersInput"/>
+      </view>
+      <view class="form-item">
+        <text class="label">预估月数</text>
+        <input type="number" placeholder="请输入月数" 
+               value="{{formData.estimatedMonths}}" 
+               bindinput="onMonthsInput"/>
+      </view>
+    </block>
+
+    <view class="form-item">
+      <text class="label">工作地点</text>
+      <text class="location-text">{{location.address || '正在获取...'}}</text>
+    </view>
+  </view>
+
+  <view class="submit-section">
+    <button class="submit-btn" bindtap="submitDemand">发布需求</button>
+  </view>
+</view>
+

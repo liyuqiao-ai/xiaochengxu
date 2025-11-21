@@ -1,0 +1,61 @@
+.container {
+  padding: 20rpx;
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+
+.form-section {
+  background: white;
+  border-radius: 10rpx;
+  padding: 20rpx;
+  margin-bottom: 20rpx;
+}
+
+.form-item {
+  display: flex;
+  align-items: center;
+  padding: 30rpx 0;
+  border-bottom: 1rpx solid #eee;
+}
+
+.form-item:last-child {
+  border-bottom: none;
+}
+
+.label {
+  width: 200rpx;
+  font-size: 32rpx;
+  color: #333;
+}
+
+.picker {
+  flex: 1;
+  font-size: 32rpx;
+  color: #333;
+}
+
+input {
+  flex: 1;
+  font-size: 32rpx;
+  color: #333;
+}
+
+.location-text {
+  flex: 1;
+  font-size: 32rpx;
+  color: #666;
+}
+
+.submit-section {
+  padding: 20rpx;
+}
+
+.submit-btn {
+  width: 100%;
+  background-color: #4CAF50;
+  color: white;
+  border-radius: 10rpx;
+  padding: 30rpx;
+  font-size: 36rpx;
+}
+

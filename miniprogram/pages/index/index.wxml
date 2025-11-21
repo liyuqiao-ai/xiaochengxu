@@ -1,0 +1,30 @@
+<view class="container">
+  <view class="header">
+    <text class="title">农业零工平台</text>
+    <text class="subtitle">连接农户与工人的桥梁</text>
+  </view>
+
+  <view class="user-info" wx:if="{{userInfo}}">
+    <image class="avatar" src="{{userInfo.avatarUrl}}" mode="aspectFill"></image>
+    <text class="nickname">{{userInfo.nickName}}</text>
+  </view>
+
+  <view class="actions">
+    <button class="btn-primary" bindtap="publishDemand">发布需求</button>
+  </view>
+
+  <view class="orders-section">
+    <view class="section-title">进行中的订单</view>
+    <view class="order-list">
+      <view class="order-item" wx:for="{{inProgressOrders}}" wx:key="_id" 
+            bindtap="viewOrderDetail" data-order-id="{{item._id}}">
+        <text class="order-job">{{item.jobType}}</text>
+        <text class="order-status">{{item.status}}</text>
+      </view>
+      <view class="empty" wx:if="{{inProgressOrders.length === 0}}">
+        暂无进行中的订单
+      </view>
+    </view>
+  </view>
+</view>
+

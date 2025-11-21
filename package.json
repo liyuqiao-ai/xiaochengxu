@@ -1,0 +1,35 @@
+{
+  "name": "agriculture-worker-platform",
+  "version": "1.0.0",
+  "description": "农业零工数字化平台",
+  "main": "index.js",
+  "scripts": {
+    "dev": "npm run dev:miniprogram",
+    "dev:miniprogram": "echo '请使用微信开发者工具打开 miniprogram 目录'",
+    "build": "npm run build:cloud-functions",
+    "build:cloud-functions": "tsc -p cloud-functions/tsconfig.json",
+    "test": "jest",
+    "lint": "eslint . --ext .ts,.tsx",
+    "format": "prettier --write \"**/*.{ts,tsx,json,md}\""
+  },
+  "keywords": [
+    "agriculture",
+    "worker",
+    "miniprogram",
+    "wechat"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^18.0.0",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^8.0.0",
+    "prettier": "^2.8.0",
+    "typescript": "^4.9.0"
+  },
+  "dependencies": {
+    "wx-server-sdk": "^2.6.3"
+  }
+}
+

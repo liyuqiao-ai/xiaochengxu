@@ -1,0 +1,10 @@
+{
+  "name": "submitQuote",
+  "version": "1.0.0",
+  "description": "提交报价云函数",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "^2.6.3"
+  }
+}
+

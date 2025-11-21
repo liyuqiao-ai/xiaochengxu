@@ -1,0 +1,48 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+}
+
+.logo {
+  text-align: center;
+  margin-bottom: 100rpx;
+}
+
+.logo-img {
+  width: 200rpx;
+  height: 200rpx;
+  margin-bottom: 20rpx;
+}
+
+.logo-text {
+  display: block;
+  font-size: 48rpx;
+  color: white;
+  font-weight: bold;
+}
+
+.login-form {
+  width: 80%;
+  margin-bottom: 40rpx;
+}
+
+.login-btn {
+  width: 100%;
+  background-color: white;
+  color: #4CAF50;
+  border-radius: 50rpx;
+  padding: 30rpx;
+  font-size: 36rpx;
+  font-weight: bold;
+}
+
+.tips {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 24rpx;
+}
+
