@@ -1,0 +1,137 @@
+.container {
+  padding: 20rpx;
+  background-color: #f5f5f5;
+  min-height: 100vh;
+  padding-bottom: 120rpx;
+}
+
+.order-header {
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  border-radius: 10rpx;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+  color: white;
+  text-align: center;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 8rpx 20rpx;
+  border-radius: 20rpx;
+  font-size: 24rpx;
+  margin-bottom: 10rpx;
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+.job-type {
+  display: block;
+  font-size: 48rpx;
+  font-weight: bold;
+  margin-top: 10rpx;
+}
+
+.section {
+  background: white;
+  border-radius: 10rpx;
+  padding: 20rpx;
+  margin-bottom: 20rpx;
+}
+
+.section-title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 20rpx;
+  padding-bottom: 10rpx;
+  border-bottom: 2rpx solid #eee;
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.info-item:last-child {
+  border-bottom: none;
+}
+
+.label {
+  font-size: 28rpx;
+  color: #666;
+}
+
+.value {
+  font-size: 28rpx;
+  color: #333;
+  text-align: right;
+  flex: 1;
+}
+
+.value.location {
+  color: #4CAF50;
+}
+
+.value.price {
+  color: #ff6b35;
+  font-weight: bold;
+}
+
+.value.price.large {
+  font-size: 36rpx;
+}
+
+.timeline-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 15rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.timeline-item:last-child {
+  border-bottom: none;
+}
+
+.timeline-label {
+  font-size: 28rpx;
+  color: #666;
+}
+
+.timeline-value {
+  font-size: 28rpx;
+  color: #333;
+}
+
+.action-section {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 20rpx;
+  background: white;
+  border-top: 1rpx solid #eee;
+  box-shadow: 0 -2rpx 10rpx rgba(0, 0, 0, 0.1);
+  display: flex;
+  gap: 20rpx;
+}
+
+.action-btn {
+  flex: 1;
+  padding: 30rpx;
+  border-radius: 10rpx;
+  font-size: 32rpx;
+  font-weight: bold;
+}
+
+.action-btn.primary {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.action-btn.danger {
+  background-color: #ff4444;
+  color: white;
+}
+

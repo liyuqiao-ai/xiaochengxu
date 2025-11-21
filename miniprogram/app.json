@@ -4,7 +4,11 @@
     "pages/login/login",
     "contractor/pages/index/index",
     "contractor/pages/order-detail/order-detail",
-    "contractor/pages/submit-quote/submit-quote"
+    "contractor/pages/submit-quote/submit-quote",
+    "farmer/pages/order-detail/order-detail",
+    "farmer/pages/quotes/quotes",
+    "worker/pages/index/index",
+    "introducer/pages/index/index"
   ],
   "window": {
     "backgroundTextStyle": "light",

@@ -1,0 +1,188 @@
+.container {
+  padding: 20rpx;
+  background-color: #f5f5f5;
+  min-height: 100vh;
+  padding-bottom: 100rpx;
+}
+
+.header {
+  background: white;
+  border-radius: 10rpx;
+  padding: 20rpx;
+  margin-bottom: 20rpx;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+}
+
+.avatar {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  margin-right: 20rpx;
+}
+
+.nickname {
+  font-size: 32rpx;
+  color: #333;
+  font-weight: bold;
+}
+
+.section {
+  background: white;
+  border-radius: 10rpx;
+  padding: 20rpx;
+  margin-bottom: 20rpx;
+}
+
+.section-title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 20rpx;
+  padding-bottom: 10rpx;
+  border-bottom: 2rpx solid #eee;
+}
+
+.promotion-card {
+  padding: 20rpx;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 10rpx;
+  color: white;
+}
+
+.promotion-code {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.code-label {
+  font-size: 28rpx;
+  margin-right: 20rpx;
+}
+
+.code-value {
+  flex: 1;
+  font-size: 36rpx;
+  font-weight: bold;
+  font-family: monospace;
+}
+
+.btn-copy {
+  background-color: rgba(255, 255, 255, 0.3);
+  color: white;
+  border: 1rpx solid rgba(255, 255, 255, 0.5);
+}
+
+.commission-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.commission-label {
+  font-size: 28rpx;
+}
+
+.commission-value {
+  font-size: 48rpx;
+  font-weight: bold;
+}
+
+.btn-share {
+  width: 100%;
+  background-color: white;
+  color: #667eea;
+  border-radius: 8rpx;
+  font-weight: bold;
+}
+
+.project-list,
+.commission-list {
+  min-height: 200rpx;
+}
+
+.project-item,
+.commission-item {
+  padding: 20rpx;
+  border-bottom: 1rpx solid #eee;
+  margin-bottom: 10rpx;
+}
+
+.project-item:last-child,
+.commission-item:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.project-header,
+.commission-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10rpx;
+}
+
+.project-name,
+.commission-type {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.project-status {
+  font-size: 24rpx;
+  padding: 4rpx 12rpx;
+  border-radius: 4rpx;
+  background-color: #f0f0f0;
+  color: #666;
+}
+
+.project-info {
+  font-size: 28rpx;
+  color: #666;
+}
+
+.commission-amount {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #4CAF50;
+}
+
+.commission-time {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.empty {
+  text-align: center;
+  padding: 40rpx;
+  color: #999;
+  font-size: 28rpx;
+}
+
+.action-section {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 20rpx;
+  background: white;
+  border-top: 1rpx solid #eee;
+  box-shadow: 0 -2rpx 10rpx rgba(0, 0, 0, 0.1);
+}
+
+.action-btn {
+  width: 100%;
+  background-color: #4CAF50;
+  color: white;
+  border-radius: 10rpx;
+  padding: 30rpx;
+  font-size: 32rpx;
+  font-weight: bold;
+}
+

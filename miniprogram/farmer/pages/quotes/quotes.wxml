@@ -1,0 +1,46 @@
+<view class="container">
+  <view class="order-info" wx:if="{{order}}">
+    <view class="order-title">{{order.jobType}}</view>
+    <view class="order-location">{{order.location.address}}</view>
+  </view>
+
+  <view class="quotes-section">
+    <view class="section-title">报价列表</view>
+    <view class="quote-list">
+      <view class="quote-item" wx:for="{{quotes}}" wx:key="contractorId">
+        <view class="quote-header">
+          <image class="contractor-avatar" src="{{item.contractorAvatar}}" mode="aspectFill"></image>
+          <view class="contractor-info">
+            <text class="contractor-name">{{item.contractorName}}</text>
+            <text class="credit-score">信用分：{{item.creditScore}}</text>
+          </view>
+          <view class="quote-price">
+            <text class="price-label">报价</text>
+            <text class="price-value">{{formatAmount(item.quotePrice)}} 元</text>
+          </view>
+        </view>
+        <view class="quote-footer">
+          <text class="quote-time">报价时间：{{formatDate(item.quotedAt)}}</text>
+          <view class="quote-actions">
+            <button class="btn-detail" size="mini" bindtap="viewContractorDetail" data-contractor-id="{{item.contractorId}}">
+              查看详情
+            </button>
+            <button
+              class="btn-accept"
+              size="mini"
+              wx:if="{{order.status === 'quoted'}}"
+              bindtap="acceptQuote"
+              data-contractor-id="{{item.contractorId}}"
+            >
+              接受报价
+            </button>
+          </view>
+        </view>
+      </view>
+      <view class="empty" wx:if="{{quotes.length === 0}}">
+        暂无报价
+      </view>
+    </view>
+  </view>
+</view>
+

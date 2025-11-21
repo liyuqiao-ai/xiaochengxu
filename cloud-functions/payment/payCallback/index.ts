@@ -113,11 +113,18 @@ export const main = async (event: any) => {
 
       // 9. 触发自动分账
       if (order.financials) {
-        // TODO: 实现自动分账逻辑
-        console.log('触发自动分账:', {
-          orderId: order._id,
-          financials: order.financials,
-        });
+        try {
+          await cloud.callFunction({
+            name: 'executeSettlement',
+            data: {
+              orderId: order._id,
+              paymentId: payment._id,
+            },
+          });
+        } catch (error) {
+          console.error('自动分账失败:', error);
+          // 分账失败不影响支付成功，记录错误即可
+        }
       }
     }
 

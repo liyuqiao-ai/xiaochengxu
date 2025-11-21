@@ -1,0 +1,73 @@
+<view class="container">
+  <view class="header">
+    <view class="user-info" wx:if="{{userInfo}}">
+      <image class="avatar" src="{{userInfo.avatarUrl}}" mode="aspectFill"></image>
+      <text class="nickname">{{userInfo.nickName}}</text>
+    </view>
+  </view>
+
+  <!-- 推广信息 -->
+  <view class="section">
+    <view class="section-title">推广信息</view>
+    <view class="promotion-card">
+      <view class="promotion-code">
+        <text class="code-label">推广码</text>
+        <text class="code-value">{{promotionCode}}</text>
+        <button class="btn-copy" size="mini" bindtap="copyPromotionCode">复制</button>
+      </view>
+      <view class="commission-info">
+        <text class="commission-label">累计佣金</text>
+        <text class="commission-value">{{formatAmount(totalCommission)}} 元</text>
+      </view>
+      <button class="btn-share" bindtap="sharePromotion">分享推广</button>
+    </view>
+  </view>
+
+  <!-- 我的项目 -->
+  <view class="section">
+    <view class="section-title">我的项目</view>
+    <view class="project-list">
+      <view
+        class="project-item"
+        wx:for="{{myProjects}}"
+        wx:key="_id"
+        bindtap="viewProjectDetail"
+        data-order-id="{{item._id}}"
+      >
+        <view class="project-header">
+          <text class="project-name">{{item.jobType}}</text>
+          <text class="project-status">{{item.status}}</text>
+        </view>
+        <view class="project-info">
+          <text class="project-commission">佣金：{{formatAmount(item.commission)}} 元</text>
+        </view>
+      </view>
+      <view class="empty" wx:if="{{myProjects.length === 0}}">
+        暂无项目
+      </view>
+    </view>
+  </view>
+
+  <!-- 佣金记录 -->
+  <view class="section">
+    <view class="section-title">佣金记录</view>
+    <view class="commission-list">
+      <view class="commission-item" wx:for="{{commissionRecords}}" wx:key="_id">
+        <view class="commission-header">
+          <text class="commission-type">{{item.type}}</text>
+          <text class="commission-amount">+{{formatAmount(item.amount)}} 元</text>
+        </view>
+        <text class="commission-time">{{item.createdAt}}</text>
+      </view>
+      <view class="empty" wx:if="{{commissionRecords.length === 0}}">
+        暂无记录
+      </view>
+    </view>
+  </view>
+
+  <!-- 操作按钮 -->
+  <view class="action-section">
+    <button class="action-btn" bindtap="applyWithdraw">申请提现</button>
+  </view>
+</view>
+

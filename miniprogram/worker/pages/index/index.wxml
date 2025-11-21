@@ -1,0 +1,64 @@
+<view class="container">
+  <view class="header">
+    <view class="user-info" wx:if="{{userInfo}}">
+      <image class="avatar" src="{{userInfo.avatarUrl}}" mode="aspectFill"></image>
+      <text class="nickname">{{userInfo.nickName}}</text>
+    </view>
+  </view>
+
+  <!-- 附近任务 -->
+  <view class="section">
+    <view class="section-title">附近任务</view>
+    <view class="task-list">
+      <view
+        class="task-item"
+        wx:for="{{nearbyTasks}}"
+        wx:key="_id"
+        bindtap="viewTaskDetail"
+        data-task-id="{{item._id}}"
+      >
+        <view class="task-header">
+          <text class="task-job">{{item.jobType}}</text>
+          <text class="task-status">{{item.status}}</text>
+        </view>
+        <view class="task-info">
+          <text class="task-location">{{item.location.address}}</text>
+        </view>
+        <view class="task-actions">
+          <button class="btn-join" size="mini" catchtap="joinTeam" data-contractor-id="{{item.contractorId}}">
+            加入团队
+          </button>
+        </view>
+      </view>
+      <view class="empty" wx:if="{{nearbyTasks.length === 0}}">
+        暂无附近任务
+      </view>
+    </view>
+  </view>
+
+  <!-- 我的任务 -->
+  <view class="section">
+    <view class="section-title">我的任务</view>
+    <view class="task-list">
+      <view
+        class="task-item"
+        wx:for="{{myTasks}}"
+        wx:key="_id"
+        bindtap="viewTaskDetail"
+        data-task-id="{{item._id}}"
+      >
+        <view class="task-header">
+          <text class="task-job">{{item.jobType}}</text>
+          <text class="task-status">{{item.status}}</text>
+        </view>
+        <view class="task-info">
+          <text class="task-location">{{item.location.address}}</text>
+        </view>
+      </view>
+      <view class="empty" wx:if="{{myTasks.length === 0}}">
+        暂无任务
+      </view>
+    </view>
+  </view>
+</view>
+

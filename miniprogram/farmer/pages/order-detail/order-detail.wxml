@@ -1,0 +1,125 @@
+<view class="container">
+  <view class="order-header" wx:if="{{order}}">
+    <view class="status-badge {{order.status}}">
+      {{getStatusText(order.status)}}
+    </view>
+    <text class="job-type">{{order.jobType}}</text>
+  </view>
+
+  <!-- 订单基本信息 -->
+  <view class="section" wx:if="{{order}}">
+    <view class="section-title">订单信息</view>
+    <view class="info-item">
+      <text class="label">订单编号</text>
+      <text class="value">{{order._id}}</text>
+    </view>
+    <view class="info-item">
+      <text class="label">工种类型</text>
+      <text class="value">{{order.jobType}}</text>
+    </view>
+    <view class="info-item">
+      <text class="label">计价模式</text>
+      <text class="value">
+        <text wx:if="{{order.pricingMode === 'piece'}}">记件</text>
+        <text wx:if="{{order.pricingMode === 'daily'}}">按天</text>
+        <text wx:if="{{order.pricingMode === 'monthly'}}">包月</text>
+      </text>
+    </view>
+    <view class="info-item" bindtap="viewLocation">
+      <text class="label">工作地点</text>
+      <text class="value location">{{order.location.address}} ></text>
+    </view>
+  </view>
+
+  <!-- 报价信息 -->
+  <view class="section" wx:if="{{order && order.status === 'quoted'}}">
+    <view class="section-title">报价信息</view>
+    <view class="info-item" wx:if="{{order.pricingMode === 'piece' && order.pieceInfo.unitPrice}}">
+      <text class="label">报价单价</text>
+      <text class="value price">{{formatAmount(order.pieceInfo.unitPrice)}} 元/{{order.pieceInfo.unit}}</text>
+    </view>
+    <view class="info-item" wx:if="{{order.pricingMode === 'daily' && order.dailyInfo.dailySalary}}">
+      <text class="label">报价日薪</text>
+      <text class="value price">{{formatAmount(order.dailyInfo.dailySalary)}} 元/人/天</text>
+    </view>
+    <view class="info-item" wx:if="{{order.pricingMode === 'monthly' && order.monthlyInfo.monthlySalary}}">
+      <text class="label">报价月薪</text>
+      <text class="value price">{{formatAmount(order.monthlyInfo.monthlySalary)}} 元/人/月</text>
+    </view>
+  </view>
+
+  <!-- 财务信息 -->
+  <view class="section" wx:if="{{order && order.financials}}">
+    <view class="section-title">财务信息</view>
+    <view class="info-item">
+      <text class="label">基础劳务费</text>
+      <text class="value">{{formatAmount(order.financials.baseAmount)}} 元</text>
+    </view>
+    <view class="info-item">
+      <text class="label">平台服务费</text>
+      <text class="value">{{formatAmount(order.financials.platformFee)}} 元</text>
+    </view>
+    <view class="info-item">
+      <text class="label">支付总额</text>
+      <text class="value price large">{{formatAmount(order.financials.totalAmount)}} 元</text>
+    </view>
+  </view>
+
+  <!-- 时间轴 -->
+  <view class="section" wx:if="{{order}}">
+    <view class="section-title">时间轴</view>
+    <view class="timeline-item">
+      <text class="timeline-label">创建时间</text>
+      <text class="timeline-value">{{formatDate(order.timeline.createdAt)}}</text>
+    </view>
+    <view class="timeline-item" wx:if="{{order.timeline.quotedAt}}">
+      <text class="timeline-label">报价时间</text>
+      <text class="timeline-value">{{formatDate(order.timeline.quotedAt)}}</text>
+    </view>
+    <view class="timeline-item" wx:if="{{order.timeline.confirmedAt}}">
+      <text class="timeline-label">确认时间</text>
+      <text class="timeline-value">{{formatDate(order.timeline.confirmedAt)}}</text>
+    </view>
+    <view class="timeline-item" wx:if="{{order.timeline.startedAt}}">
+      <text class="timeline-label">开始时间</text>
+      <text class="timeline-value">{{formatDate(order.timeline.startedAt)}}</text>
+    </view>
+    <view class="timeline-item" wx:if="{{order.timeline.completedAt}}">
+      <text class="timeline-label">完成时间</text>
+      <text class="timeline-value">{{formatDate(order.timeline.completedAt)}}</text>
+    </view>
+  </view>
+
+  <!-- 操作按钮 -->
+  <view class="action-section" wx:if="{{order}}">
+    <button
+      class="action-btn primary"
+      wx:if="{{order.status === 'quoted'}}"
+      bindtap="acceptQuote"
+    >
+      接受报价
+    </button>
+    <button
+      class="action-btn primary"
+      wx:if="{{order.status === 'confirmed'}}"
+      bindtap="startWork"
+    >
+      开始工作
+    </button>
+    <button
+      class="action-btn primary"
+      wx:if="{{order.status === 'completed' && !order.paymentStatus}}"
+      bindtap="goToPayment"
+    >
+      去支付
+    </button>
+    <button
+      class="action-btn danger"
+      wx:if="{{order.status === 'pending' || order.status === 'quoted' || order.status === 'confirmed'}}"
+      bindtap="cancelOrder"
+    >
+      取消订单
+    </button>
+  </view>
+</view>
+

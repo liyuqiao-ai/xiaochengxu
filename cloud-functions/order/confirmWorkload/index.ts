@@ -83,8 +83,21 @@ export const main = async (event: any) => {
       updateData.status = 'completed';
       updateData['timeline.completedAt'] = new Date();
 
-      // 触发自动分账
-      await triggerSettlement(orderId, payment);
+      // 触发自动分账（如果已支付）
+      const payments = await db.queryDocs('payments', { orderId, status: 'paid' });
+      if (payments.length > 0) {
+        try {
+          await cloud.callFunction({
+            name: 'executeSettlement',
+            data: {
+              orderId,
+              paymentId: payments[0]._id,
+            },
+          });
+        } catch (error) {
+          console.error('自动分账失败:', error);
+        }
+      }
     }
 
     // 6. 更新订单
