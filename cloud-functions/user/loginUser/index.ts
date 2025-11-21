@@ -31,16 +31,32 @@ export const main = async (event: any) => {
     }
 
     // 2. 通过code获取openid
-    const loginResult = await cloud.callFunction({
-      name: 'getOpenId',
-      data: { code },
-    });
+    // 方式1：直接使用云函数上下文获取（推荐）
+    const wxContext = cloud.getWXContext();
+    let openid = wxContext.OPENID;
 
-    if (!loginResult.result?.openid) {
-      return createErrorResponse(ErrorCode.LOGIN_FAILED, '获取用户信息失败');
+    // 方式2：如果上下文无法获取，调用getOpenId云函数
+    if (!openid) {
+      try {
+        const loginResult = await cloud.callFunction({
+          name: 'getOpenId',
+          data: { code },
+        });
+
+        if (!loginResult.result?.success || !loginResult.result?.data?.openid) {
+          return createErrorResponse(ErrorCode.LOGIN_FAILED, '获取用户信息失败');
+        }
+
+        openid = loginResult.result.data.openid;
+      } catch (error: any) {
+        console.error('调用getOpenId失败:', error);
+        return createErrorResponse(ErrorCode.LOGIN_FAILED, '获取用户信息失败');
+      }
     }
 
-    const openid = loginResult.result.openid;
+    if (!openid) {
+      return createErrorResponse(ErrorCode.LOGIN_FAILED, '无法获取用户openid');
+    }
 
     // 3. 查询用户是否存在
     const users = await db.queryDocs('users', { openid });
