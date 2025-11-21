@@ -155,6 +155,16 @@ declare namespace wx {
     withShareTicket?: boolean;
   }): void;
   function canIUse(api: string): boolean;
+  function requestPayment(options: {
+    timeStamp: string;
+    nonceStr: string;
+    package: string;
+    signType: 'MD5' | 'HMAC-SHA256';
+    paySign: string;
+    success?: () => void;
+    fail?: (err: any) => void;
+    complete?: () => void;
+  }): void;
 }
 
 declare function App(options: {
