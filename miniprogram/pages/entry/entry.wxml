@@ -8,34 +8,45 @@
     <!-- 农户 -->
     <view class="role-item" bindtap="selectRole" data-role="farmer">
       <view class="role-icon">🌾</view>
-      <text class="role-name">农户</text>
-      <text class="role-desc">发布农业需求，寻找工人</text>
+      <view class="role-content">
+        <text class="role-name">农户</text>
+        <text class="role-desc">发布农业需求，寻找工人</text>
+      </view>
+      <view class="role-arrow">›</view>
     </view>
 
     <!-- 工头 -->
     <view class="role-item" bindtap="selectRole" data-role="contractor">
       <view class="role-icon">👷</view>
-      <text class="role-name">工头</text>
-      <text class="role-desc">接单报价，管理团队</text>
+      <view class="role-content">
+        <text class="role-name">工头</text>
+        <text class="role-desc">接单报价，管理团队</text>
+      </view>
+      <view class="role-arrow">›</view>
     </view>
 
     <!-- 工人 -->
     <view class="role-item" bindtap="selectRole" data-role="worker">
       <view class="role-icon">👨‍🌾</view>
-      <text class="role-name">工人</text>
-      <text class="role-desc">寻找工作，加入团队</text>
+      <view class="role-content">
+        <text class="role-name">工人</text>
+        <text class="role-desc">寻找工作，加入团队</text>
+      </view>
+      <view class="role-arrow">›</view>
     </view>
 
     <!-- 介绍方 -->
     <view class="role-item" bindtap="selectRole" data-role="introducer">
       <view class="role-icon">🤝</view>
-      <text class="role-name">介绍方</text>
-      <text class="role-desc">推广项目，获得佣金</text>
+      <view class="role-content">
+        <text class="role-name">介绍方</text>
+        <text class="role-desc">推广项目，获得佣金</text>
+      </view>
+      <view class="role-arrow">›</view>
     </view>
   </view>
 
   <view class="footer" wx:if="{{!userInfo}}">
-    <button class="login-btn" bindtap="goToLogin">登录账号</button>
+    <text class="footer-text">选择角色后即可开始使用</text>
   </view>
 </view>
-

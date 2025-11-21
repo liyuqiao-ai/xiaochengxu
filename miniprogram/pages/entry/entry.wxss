@@ -49,10 +49,17 @@
 .role-icon {
   font-size: 80rpx;
   margin-right: 30rpx;
+  width: 100rpx;
+  text-align: center;
+}
+
+.role-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .role-name {
-  flex: 1;
   font-size: 36rpx;
   font-weight: bold;
   color: #333;
@@ -60,23 +67,24 @@
 }
 
 .role-desc {
-  display: block;
   font-size: 28rpx;
   color: #666;
-  margin-top: 10rpx;
+  line-height: 1.5;
+}
+
+.role-arrow {
+  font-size: 48rpx;
+  color: #ccc;
+  margin-left: 20rpx;
 }
 
 .footer {
   margin-top: 40rpx;
+  text-align: center;
 }
 
-.login-btn {
-  width: 100%;
-  background: rgba(255, 255, 255, 0.2);
+.footer-text {
   color: white;
-  border: 2rpx solid white;
-  border-radius: 10rpx;
-  padding: 30rpx;
-  font-size: 32rpx;
+  font-size: 28rpx;
+  opacity: 0.8;
 }
-
