@@ -147,9 +147,45 @@ export const main = async (event: any) => {
           // 分账失败不影响支付成功，记录错误即可
         }
       }
+
+      // 11. 发送支付成功通知给双方
+      try {
+        // 通知农户
+        await cloud.callFunction({
+          name: 'sendNotification',
+          data: {
+            type: 'payment_success',
+            target: order.farmerId,
+            data: {
+              orderId: order._id,
+              amount: payment.amount,
+              transactionId: transaction_id,
+            },
+          },
+        });
+
+        // 通知工头
+        if (order.contractorId) {
+          await cloud.callFunction({
+            name: 'sendNotification',
+            data: {
+              type: 'payment_success',
+              target: order.contractorId,
+              data: {
+                orderId: order._id,
+                amount: order.financials?.contractorIncome || 0,
+                transactionId: transaction_id,
+              },
+            },
+          });
+        }
+      } catch (notifyError) {
+        console.error('发送支付成功通知失败:', notifyError);
+        // 通知失败不影响支付成功
+      }
     }
 
-    // 11. 返回成功响应
+    // 12. 返回成功响应
     return generateXML('SUCCESS', 'OK');
   } catch (error: any) {
     console.error('支付回调处理失败:', error);

@@ -23,7 +23,7 @@ const db = createDatabase();
  * 主函数
  */
 export const main = async (event: any) => {
-  const { contractorId, orderId } = event;
+  const { contractorId, message } = event;
 
   try {
     // 1. 认证和权限检查
@@ -40,12 +40,12 @@ export const main = async (event: any) => {
     }
 
     // 2. 参数验证
-    if (!contractorId || !orderId) {
-      return createInvalidParamsResponse('缺少必要参数：contractorId, orderId');
+    if (!contractorId) {
+      return createInvalidParamsResponse('缺少必要参数：contractorId');
     }
 
-    if (!validateId(contractorId) || !validateId(orderId)) {
-      return createInvalidParamsResponse('ID格式无效');
+    if (!validateId(contractorId)) {
+      return createInvalidParamsResponse('工头ID格式无效');
     }
 
     const workerId = context!.userId;
@@ -60,17 +60,7 @@ export const main = async (event: any) => {
       return createErrorResponse(ErrorCode.USER_ROLE_MISMATCH, '用户不是工头');
     }
 
-    // 4. 验证订单是否存在且属于该工头
-    const order = await db.getDoc('orders', orderId);
-    if (!order) {
-      return createErrorResponse(ErrorCode.ORDER_NOT_FOUND);
-    }
-
-    if (order.contractorId !== contractorId) {
-      return createErrorResponse(ErrorCode.ORDER_STATUS_INVALID, '订单不属于该工头');
-    }
-
-    // 5. 检查工人是否已经在该工头的团队中
+    // 4. 检查工人是否已经在该工头的团队中
     const worker = await db.getDoc('users', workerId);
     if (!worker) {
       return createErrorResponse(ErrorCode.USER_NOT_FOUND, '工人不存在');
@@ -95,7 +85,7 @@ export const main = async (event: any) => {
     const requestId = await db.addDoc('team_requests', {
       workerId,
       contractorId,
-      orderId,
+      message: message || '',
       status: 'pending',
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -112,7 +102,7 @@ export const main = async (event: any) => {
             requestId,
             workerId,
             workerName: worker.nickName || '工人',
-            orderId,
+            message: message || '',
           },
         },
       });

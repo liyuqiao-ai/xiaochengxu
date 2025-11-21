@@ -24,7 +24,7 @@ const db = createDatabase();
  * 主函数
  */
 export const main = async (event: any) => {
-  const { requestId, action } = event;
+  const { requestId, status, contractorId: eventContractorId } = event;
 
   try {
     // 1. 认证和权限检查
@@ -41,19 +41,24 @@ export const main = async (event: any) => {
     }
 
     // 2. 参数验证
-    if (!requestId || !action) {
-      return createInvalidParamsResponse('缺少必要参数：requestId, action');
+    if (!requestId || !status) {
+      return createInvalidParamsResponse('缺少必要参数：requestId, status');
     }
 
     if (!validateId(requestId)) {
       return createInvalidParamsResponse('申请ID格式无效');
     }
 
-    if (!['approve', 'reject'].includes(action)) {
-      return createInvalidParamsResponse('action必须是approve或reject');
+    if (!['approved', 'rejected'].includes(status)) {
+      return createInvalidParamsResponse('status必须是approved或rejected');
     }
 
-    const contractorId = context!.userId;
+    const contractorId = eventContractorId || context!.userId;
+    
+    // 验证contractorId与当前用户一致
+    if (contractorId !== context!.userId) {
+      return createErrorResponse(ErrorCode.USER_NOT_AUTHORIZED, '只能审核自己的团队申请');
+    }
 
     // 3. 获取申请信息
     const request = await db.getDoc('team_requests', requestId);
@@ -81,7 +86,7 @@ export const main = async (event: any) => {
         }
 
         return {
-          status: action === 'approve' ? 'approved' : 'rejected',
+          status: status,
           reviewedAt: new Date(),
           reviewedBy: contractorId,
         };
@@ -93,7 +98,7 @@ export const main = async (event: any) => {
     }
 
     // 7. 如果同意，更新工人的contractorId
-    if (action === 'approve') {
+    if (status === 'approved') {
       await db.updateDoc('users', request.workerId, {
         contractorId: contractorId,
         updatedAt: new Date(),
@@ -136,8 +141,8 @@ export const main = async (event: any) => {
 
     return createSuccessResponse({
       requestId,
-      action,
-      message: action === 'approve' ? '已同意申请' : '已拒绝申请',
+      status,
+      message: status === 'approved' ? '已同意申请' : '已拒绝申请',
     });
   } catch (error: any) {
     console.error('审核申请失败:', error);

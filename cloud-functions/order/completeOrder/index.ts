@@ -64,16 +64,29 @@ export const main = async (event: any) => {
       'timeline.completedAt': new Date(),
     });
 
-    // 9. 发送通知
+    // 9. 发送通知给双方
     try {
+      // 通知农户
       await cloud.callFunction({
         name: 'sendNotification',
         data: {
-          type: 'order_completed',
+          type: 'work_completed',
           target: order.farmerId,
           data: { orderId },
         },
       });
+
+      // 通知工头
+      if (order.contractorId) {
+        await cloud.callFunction({
+          name: 'sendNotification',
+          data: {
+            type: 'work_completed',
+            target: order.contractorId,
+            data: { orderId },
+          },
+        });
+      }
     } catch (notifyError) {
       console.error('发送通知失败:', notifyError);
     }

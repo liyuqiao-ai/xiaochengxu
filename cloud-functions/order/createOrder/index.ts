@@ -27,8 +27,14 @@ async function sendNotification(params: {
   target: string | string[];
   data: any;
 }) {
-  // TODO: 实现通知发送逻辑
-  console.log('发送通知:', params);
+  try {
+    await cloud.callFunction({
+      name: 'sendNotification',
+      data: params,
+    });
+  } catch (error) {
+    console.error('发送通知失败:', error);
+  }
 }
 
 /**

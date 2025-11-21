@@ -103,9 +103,14 @@ export const main = async (event: any) => {
 
     const nearbyOrders = ordersWithDistance;
 
+    // 5. 限制返回数量（默认50条）
+    const maxResults = event.maxResults || 50;
+    const limitedTasks = nearbyOrders.slice(0, maxResults);
+
     return createSuccessResponse({
-      tasks: nearbyOrders,
-      total: nearbyOrders.length,
+      tasks: limitedTasks,
+      total: limitedTasks.length,
+      radius: radius, // 返回使用的半径（公里）
     });
   } catch (error: any) {
     console.error('获取附近任务失败:', error);
