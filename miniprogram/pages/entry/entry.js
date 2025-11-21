@@ -55,12 +55,12 @@ Page({
 
     const userInfo = this.data.userInfo;
 
-    // 如果未登录，允许选择角色但提示需要登录
+    // 如果未登录，直接跳转到对应角色页面（允许未登录访问，登录功能后续完善）
     if (!userInfo) {
-      console.log('用户未登录，允许选择角色但需要登录');
-      // 先保存选择的角色到本地，然后跳转到登录页
+      console.log('用户未登录，直接跳转到角色页面');
+      // 保存选择的角色到本地
       wx.setStorageSync('selectedRole', role);
-      // 直接跳转到对应角色页面（允许未登录访问，登录功能后续完善）
+      // 直接跳转到对应角色页面
       this.redirectToRole(role);
       return;
     }
