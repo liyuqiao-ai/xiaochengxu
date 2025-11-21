@@ -23,9 +23,9 @@
       <view class="quote-price">
         <text class="price-label">报价：</text>
         <text class="price-value">{{item.quotePrice / 100}} 元</text>
-        <text class="price-unit" wx:if="{{order.pricingMode === 'piece'}}/{{order.pieceInfo.unit}}</text>
-        <text class="price-unit" wx:if="{{order.pricingMode === 'daily'}}人/天</text>
-        <text class="price-unit" wx:if="{{order.pricingMode === 'monthly'}}人/月</text>
+        <text class="price-unit" wx:if="{{order.pricingMode === 'piece'}}">/{{order.pieceInfo.unit}}</text>
+        <text class="price-unit" wx:if="{{order.pricingMode === 'daily'}}">人/天</text>
+        <text class="price-unit" wx:if="{{order.pricingMode === 'monthly'}}">人/月</text>
       </view>
 
       <view class="quote-time">

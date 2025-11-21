@@ -78,48 +78,56 @@ Page({
   /**
    * 根据角色跳转
    * 严格按照要求：严格跳转到对应subPackage首页
+   * 优化：直接使用reLaunch，避免navigateTo超时问题
    */
   redirectToRole(role) {
     console.log('redirectToRole被调用，角色:', role);
     
     // 严格按照多subPackages架构跳转
-    const roleRoutes = {
-      farmer: '/farmer/pages/index/index',
-      contractor: '/contractor/pages/index/index',
-      worker: '/worker/pages/index/index',
-      introducer: '/introducer/pages/index/index',
-    };
-
-    const route = roleRoutes[role];
-    if (!route) {
-      console.error('无效的角色:', role);
-      wx.showToast({
-        title: '无效的角色',
-        icon: 'none',
-      });
-      return;
+    let targetPath = '';
+    switch (role) {
+      case 'farmer':
+        targetPath = '/farmer/pages/index/index';
+        break;
+      case 'contractor':
+        targetPath = '/contractor/pages/index/index';
+        break;
+      case 'worker':
+        targetPath = '/worker/pages/index/index';
+        break;
+      case 'introducer':
+        targetPath = '/introducer/pages/index/index';
+        break;
+      default:
+        console.error('未知角色:', role);
+        wx.showToast({
+          title: '无效的角色',
+          icon: 'none',
+        });
+        return;
     }
 
-    console.log('准备跳转到:', route);
+    console.log('准备跳转到:', targetPath);
 
-    // 使用navigateTo先尝试，如果失败再用reLaunch
-    wx.navigateTo({
-      url: route,
-      success: () => {
-        console.log('跳转成功:', route);
+    // 直接使用reLaunch，避免页面栈问题和超时
+    // reLaunch会关闭所有页面，打开目标页面，适合跳转到subPackage
+    wx.reLaunch({
+      url: targetPath,
+      success: (res) => {
+        console.log('跳转成功:', targetPath);
       },
       fail: (err) => {
-        console.warn('navigateTo失败，尝试reLaunch:', err);
-        // 如果navigateTo失败，可能是subPackage路径问题，使用reLaunch
-        wx.reLaunch({
-          url: route,
+        console.error('跳转失败:', err);
+        // 备用方案：使用redirectTo
+        wx.redirectTo({
+          url: targetPath,
           success: () => {
-            console.log('reLaunch跳转成功:', route);
+            console.log('redirectTo跳转成功:', targetPath);
           },
-          fail: (reLaunchErr) => {
-            console.error('跳转失败:', reLaunchErr);
+          fail: (redirectErr) => {
+            console.error('redirectTo也失败:', redirectErr);
             wx.showToast({
-              title: '跳转失败: ' + (reLaunchErr.errMsg || '未知错误'),
+              title: '跳转失败: ' + (redirectErr.errMsg || '未知错误'),
               icon: 'none',
               duration: 3000,
             });
