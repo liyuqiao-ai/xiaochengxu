@@ -80,11 +80,30 @@ export const main = async (event: any) => {
       return createErrorResponse(ErrorCode.ORDER_STATUS_INVALID, transitionResult.error);
     }
 
-    // 7. 更新订单状态
-    await db.updateDoc('orders', orderId, {
-      status: 'confirmed',
-      'timeline.confirmedAt': new Date(),
-    });
+    // 7. 使用乐观锁原子性更新订单状态
+    const { optimisticUpdate } = await import('../../../shared/utils/transaction');
+    const updateResult = await optimisticUpdate(
+      'orders',
+      orderId,
+      (currentOrder: any) => {
+        // 再次验证状态（防止并发修改）
+        if (currentOrder.status !== 'quoted') {
+          throw new Error('订单状态已变更，无法接受报价');
+        }
+        if (currentOrder.contractorId !== order.contractorId) {
+          throw new Error('订单工头已变更');
+        }
+
+        return {
+          status: 'confirmed',
+          'timeline.confirmedAt': new Date(),
+        };
+      }
+    );
+
+    if (!updateResult.success) {
+      return createErrorResponse(ErrorCode.ORDER_STATUS_INVALID, updateResult.error);
+    }
 
     // 8. 通知工头
     if (order.contractorId) {
