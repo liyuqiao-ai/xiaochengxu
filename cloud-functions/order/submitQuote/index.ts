@@ -12,6 +12,7 @@ import {
 } from '../../../shared/utils/errors';
 import { authMiddleware, requireRole } from '../../../shared/middleware/auth';
 import { OrderStateMachine } from '../../../shared/utils/orderStateMachine';
+import { isValidStatusTransition } from '../../../shared/utils/validation';
 
 cloud.init({
   env: cloud.DYNAMIC_CURRENT_ENV,

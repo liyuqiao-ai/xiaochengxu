@@ -1,0 +1,64 @@
+<view class="container">
+  <view class="header">
+    <view class="user-info" wx:if="{{userInfo}}">
+      <image class="avatar" src="{{userInfo.avatarUrl}}" mode="aspectFill"></image>
+      <text class="nickname">{{userInfo.nickName}}</text>
+    </view>
+  </view>
+
+  <!-- 待报价订单 -->
+  <view class="section">
+    <view class="section-title">待报价订单</view>
+    <view class="order-list">
+      <view
+        class="order-item"
+        wx:for="{{pendingQuotes}}"
+        wx:key="_id"
+        bindtap="viewOrderDetail"
+        data-order-id="{{item._id}}"
+      >
+        <view class="order-header">
+          <text class="order-job">{{item.jobType}}</text>
+          <text class="order-status pending">待报价</text>
+        </view>
+        <view class="order-info">
+          <text class="order-location">{{item.location.address}}</text>
+        </view>
+        <view class="order-actions">
+          <button class="btn-quote" size="mini" catchtap="startQuote" data-order-id="{{item._id}}">
+            立即报价
+          </button>
+        </view>
+      </view>
+      <view class="empty" wx:if="{{pendingQuotes.length === 0}}">
+        暂无待报价订单
+      </view>
+    </view>
+  </view>
+
+  <!-- 我的订单 -->
+  <view class="section">
+    <view class="section-title">我的订单</view>
+    <view class="order-list">
+      <view
+        class="order-item"
+        wx:for="{{myOrders}}"
+        wx:key="_id"
+        bindtap="viewOrderDetail"
+        data-order-id="{{item._id}}"
+      >
+        <view class="order-header">
+          <text class="order-job">{{item.jobType}}</text>
+          <text class="order-status {{item.status}}">{{item.status}}</text>
+        </view>
+        <view class="order-info">
+          <text class="order-location">{{item.location.address}}</text>
+        </view>
+      </view>
+      <view class="empty" wx:if="{{myOrders.length === 0}}">
+        暂无订单
+      </view>
+    </view>
+  </view>
+</view>
+
