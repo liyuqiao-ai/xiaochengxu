@@ -16,6 +16,42 @@
     "worker/pages/profile/profile",
     "introducer/pages/index/index"
   ],
+  "subPackages": [
+    {
+      "root": "contractor",
+      "pages": [
+        "pages/index/index",
+        "pages/order-detail/order-detail",
+        "pages/submit-quote/submit-quote",
+        "pages/quote/quote",
+        "pages/quote-list/quote-list",
+        "pages/team/team"
+      ]
+    },
+    {
+      "root": "farmer",
+      "pages": [
+        "pages/order-detail/order-detail",
+        "pages/quotes/quotes",
+        "pages/payment/payment",
+        "pages/publish-demand/publish-demand"
+      ]
+    },
+    {
+      "root": "worker",
+      "pages": [
+        "pages/index/index",
+        "pages/task-detail/task-detail",
+        "pages/profile/profile"
+      ]
+    },
+    {
+      "root": "introducer",
+      "pages": [
+        "pages/index/index"
+      ]
+    }
+  ],
   "window": {
     "backgroundTextStyle": "light",
     "navigationBarBackgroundColor": "#4CAF50",
