@@ -12,6 +12,11 @@ declare var console: {
 };
 
 declare namespace wx {
+  namespace cloud {
+    function init(options: { env: string; traceUser?: boolean }): void;
+    function callFunction(options: { name: string; data?: any }): Promise<any>;
+  }
+
   interface CloudInitOptions {
     env: string;
     traceUser?: boolean;

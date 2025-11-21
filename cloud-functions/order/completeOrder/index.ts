@@ -11,38 +11,48 @@ import { authMiddleware, validateOrderAccess } from '../../../shared/middleware/
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV });
 const db = createDatabase();
 
+import {
+  createSuccessResponse,
+  createErrorResponse,
+  createInvalidParamsResponse,
+  ErrorCode,
+} from '../../../shared/utils/errors';
+
 export const main = async (event: any) => {
   const { orderId } = event;
 
   try {
     // 1. 参数验证
     if (!orderId) {
-      return { success: false, error: '缺少订单ID' };
+      return createInvalidParamsResponse('缺少订单ID');
     }
 
     // 2. 认证检查
     const authResult = authMiddleware(event);
     if (!authResult.success) {
-      return { success: false, error: '未授权' };
+      return authResult.response;
     }
     const { context } = authResult;
 
     // 3. 验证订单访问权限
     const accessResult = await validateOrderAccess(context!.userId, orderId);
     if (!accessResult.success) {
-      return { success: false, error: accessResult.error };
+      return createErrorResponse(ErrorCode.ORDER_NOT_FOUND, accessResult.error);
     }
 
     const order = accessResult.order;
 
     // 4. 验证订单状态
     if (order.status !== 'in_progress') {
-      return { success: false, error: `订单状态为 ${order.status}，无法完成订单` };
+      return createErrorResponse(
+        ErrorCode.ORDER_STATUS_INVALID,
+        `订单状态为 ${order.status}，无法完成订单`
+      );
     }
 
     // 5. 验证状态转换
     if (!OrderStateMachine.canComplete(order.status)) {
-      return { success: false, error: '订单状态不允许完成' };
+      return createErrorResponse(ErrorCode.ORDER_STATUS_INVALID, '订单状态不允许完成');
     }
 
     // 6. 计算费用（如果还没有计算）
@@ -55,7 +65,7 @@ export const main = async (event: any) => {
     // 7. 执行状态转换
     const transitionResult = OrderStateMachine.transition(order.status, 'completed');
     if (!transitionResult.success) {
-      return { success: false, error: transitionResult.error };
+      return createErrorResponse(ErrorCode.ORDER_STATUS_INVALID, transitionResult.error);
     }
 
     // 8. 更新订单状态
@@ -91,10 +101,10 @@ export const main = async (event: any) => {
       console.error('发送通知失败:', notifyError);
     }
 
-    return { success: true, orderId, status: 'completed' };
+    return createSuccessResponse({ orderId, status: 'completed' });
   } catch (error: any) {
     console.error('完成订单失败:', error);
-    return { success: false, error: error.message || '完成订单失败' };
+    return createErrorResponse(ErrorCode.UNKNOWN_ERROR, undefined, error.message);
   }
 };
 

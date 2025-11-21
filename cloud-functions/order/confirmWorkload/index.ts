@@ -45,22 +45,22 @@ export const main = async (event: any) => {
 
     // 2. 参数验证
     if (!orderId || !actualWorkload || !confirmedBy) {
-      return { success: false, error: '缺少必要参数：orderId, actualWorkload, confirmedBy' };
+      return createInvalidParamsResponse('缺少必要参数：orderId, actualWorkload, confirmedBy');
     }
 
     // 验证ID格式
     if (!validateId(orderId)) {
-      return { success: false, error: '订单ID格式无效' };
+      return createInvalidParamsResponse('订单ID格式无效');
     }
 
     // 验证确认方
     if (!['farmer', 'contractor'].includes(confirmedBy)) {
-      return { success: false, error: '无效的确认方，必须是 farmer 或 contractor' };
+      return createInvalidParamsResponse('无效的确认方，必须是 farmer 或 contractor');
     }
 
     // 验证工作量数据
     if (typeof actualWorkload !== 'object' || actualWorkload === null) {
-      return { success: false, error: '工作量数据格式无效' };
+      return createInvalidParamsResponse('工作量数据格式无效');
     }
 
     // 验证订单访问权限
@@ -173,10 +173,10 @@ export const main = async (event: any) => {
     const bothConfirmed =
       (updatedOrder.confirmedByFarmer && updatedOrder.confirmedByContractor) || false;
 
-    return { success: true, bothConfirmed, orderStatus: updatedOrder.status };
+    return createSuccessResponse({ bothConfirmed, orderStatus: updatedOrder.status });
   } catch (error: any) {
     console.error('确认工作量失败:', error);
-    return { success: false, error: error.message || '确认工作量失败' };
+    return createErrorResponse(ErrorCode.UNKNOWN_ERROR, undefined, error.message);
   }
 };
 

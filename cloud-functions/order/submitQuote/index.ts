@@ -9,6 +9,7 @@ import { isValidStatusTransition } from '../../../shared/utils/validation';
 import { validateId, validateAmount } from '../../../shared/utils/inputValidation';
 import { optimisticUpdate } from '../../../shared/utils/transaction';
 import { authMiddleware, requireRole } from '../../../shared/middleware/auth';
+import { createDatabase } from '../../../shared/utils/db';
 import {
   createSuccessResponse,
   createErrorResponse,
@@ -17,7 +18,7 @@ import {
 } from '../../../shared/utils/errors';
 
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV });
-const db = cloud.database();
+const db = createDatabase();
 
 /**
  * 云函数事件参数
