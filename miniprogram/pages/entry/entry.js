@@ -60,14 +60,8 @@ Page({
       console.log('用户未登录，允许选择角色但需要登录');
       // 先保存选择的角色到本地，然后跳转到登录页
       wx.setStorageSync('selectedRole', role);
-      wx.reLaunch({
-        url: '/pages/login/login',
-        fail: (err) => {
-          console.error('跳转登录页失败:', err);
-          // 如果登录页不存在，直接跳转到对应角色页面（允许未登录访问）
-          this.redirectToRole(role);
-        },
-      });
+      // 直接跳转到对应角色页面（允许未登录访问，登录功能后续完善）
+      this.redirectToRole(role);
       return;
     }
 

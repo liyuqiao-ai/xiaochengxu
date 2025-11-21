@@ -1,6 +1,7 @@
 {
   "pages": [
-    "pages/entry/entry"
+    "pages/entry/entry",
+    "pages/login/login"
   ],
   "subPackages": [
     {
