@@ -1,0 +1,90 @@
+<view class="container">
+  <!-- 标签页 -->
+  <view class="tabs">
+    <view
+      class="tab-item {{activeTab === index ? 'active' : ''}}"
+      wx:for="{{tabs}}"
+      wx:key="index"
+      wx:for-index="index"
+      bindtap="onTabChange"
+      data-index="{{index}}"
+    >
+      {{item}}
+    </view>
+  </view>
+
+  <!-- 团队成员列表 -->
+  <view class="member-list" wx:if="{{activeTab === 0}}">
+    <view
+      class="member-item"
+      wx:for="{{teamMembers}}"
+      wx:key="_id"
+    >
+      <image class="member-avatar" src="{{item.avatarUrl}}" mode="aspectFill"></image>
+      <view class="member-info">
+        <text class="member-name">{{item.nickName}}</text>
+        <text class="member-meta">信用分：{{item.creditScore}} | 技能：{{item.skills.join(', ')}}</text>
+      </view>
+      <view class="member-actions">
+        <button
+          class="btn-detail"
+          size="mini"
+          bindtap="viewMemberDetail"
+          data-worker-id="{{item._id}}"
+        >
+          详情
+        </button>
+        <button
+          class="btn-remove"
+          size="mini"
+          bindtap="removeMember"
+          data-worker-id="{{item._id}}"
+        >
+          移除
+        </button>
+      </view>
+    </view>
+    <view class="empty" wx:if="{{teamMembers.length === 0 && !loading}}">
+      暂无团队成员
+    </view>
+  </view>
+
+  <!-- 入队申请列表 -->
+  <view class="request-list" wx:if="{{activeTab === 1}}">
+    <view
+      class="request-item"
+      wx:for="{{pendingRequests}}"
+      wx:key="_id"
+    >
+      <image class="request-avatar" src="{{item.avatarUrl}}" mode="aspectFill"></image>
+      <view class="request-info">
+        <text class="request-name">{{item.nickName}}</text>
+        <text class="request-meta">信用分：{{item.creditScore}} | 申请时间：{{item.createdAt}}</text>
+      </view>
+      <view class="request-actions">
+        <button
+          class="btn-approve"
+          size="mini"
+          bindtap="reviewRequest"
+          data-request-id="{{item._id}}"
+          data-action="approve"
+        >
+          同意
+        </button>
+        <button
+          class="btn-reject"
+          size="mini"
+          bindtap="reviewRequest"
+          data-request-id="{{item._id}}"
+          data-action="reject"
+        >
+          拒绝
+        </button>
+      </view>
+    </view>
+    <view class="empty" wx:if="{{pendingRequests.length === 0 && !loading}}">
+      暂无入队申请
+    </view>
+  </view>
+</view>
+

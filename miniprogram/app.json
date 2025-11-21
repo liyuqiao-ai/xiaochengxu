@@ -5,10 +5,14 @@
     "contractor/pages/index/index",
     "contractor/pages/order-detail/order-detail",
     "contractor/pages/submit-quote/submit-quote",
+    "contractor/pages/quote/quote",
+    "contractor/pages/team/team",
     "farmer/pages/order-detail/order-detail",
     "farmer/pages/quotes/quotes",
     "farmer/pages/payment/payment",
     "worker/pages/index/index",
+    "worker/pages/task-detail/task-detail",
+    "worker/pages/profile/profile",
     "introducer/pages/index/index"
   ],
   "window": {

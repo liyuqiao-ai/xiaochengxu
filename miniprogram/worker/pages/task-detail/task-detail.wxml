@@ -1,0 +1,76 @@
+<view class="container">
+  <view class="task-header" wx:if="{{task}}">
+    <view class="status-badge {{task.status}}">
+      {{getStatusText(task.status)}}
+    </view>
+    <text class="job-type">{{task.jobType}}</text>
+  </view>
+
+  <!-- 任务基本信息 -->
+  <view class="section" wx:if="{{task}}">
+    <view class="section-title">任务信息</view>
+    <view class="info-item">
+      <text class="label">工种类型</text>
+      <text class="value">{{task.jobType}}</text>
+    </view>
+    <view class="info-item">
+      <text class="label">计价模式</text>
+      <text class="value">
+        <text wx:if="{{task.pricingMode === 'piece'}}">记件</text>
+        <text wx:if="{{task.pricingMode === 'daily'}}">按天</text>
+        <text wx:if="{{task.pricingMode === 'monthly'}}">包月</text>
+      </text>
+    </view>
+    <view class="info-item" bindtap="viewLocation">
+      <text class="label">工作地点</text>
+      <text class="value location">{{task.location.address}} ></text>
+    </view>
+    <view class="info-item">
+      <text class="label">创建时间</text>
+      <text class="value">{{formatDate(task.timeline.createdAt)}}</text>
+    </view>
+  </view>
+
+  <!-- 计价信息 -->
+  <view class="section" wx:if="{{task && task.pricingMode === 'piece'}}">
+    <view class="section-title">记件信息</view>
+    <view class="info-item">
+      <text class="label">单位</text>
+      <text class="value">{{task.pieceInfo.unit}}</text>
+    </view>
+    <view class="info-item">
+      <text class="label">预估数量</text>
+      <text class="value">{{task.pieceInfo.estimatedQuantity}}</text>
+    </view>
+  </view>
+
+  <view class="section" wx:if="{{task && task.pricingMode === 'daily'}}">
+    <view class="section-title">按天信息</view>
+    <view class="info-item">
+      <text class="label">预估用工人数</text>
+      <text class="value">{{task.dailyInfo.estimatedWorkers}} 人</text>
+    </view>
+    <view class="info-item">
+      <text class="label">预估天数</text>
+      <text class="value">{{task.dailyInfo.estimatedDays}} 天</text>
+    </view>
+  </view>
+
+  <view class="section" wx:if="{{task && task.pricingMode === 'monthly'}}">
+    <view class="section-title">包月信息</view>
+    <view class="info-item">
+      <text class="label">预估用工人数</text>
+      <text class="value">{{task.monthlyInfo.estimatedWorkers}} 人</text>
+    </view>
+    <view class="info-item">
+      <text class="label">预估月数</text>
+      <text class="value">{{task.monthlyInfo.estimatedMonths}} 月</text>
+    </view>
+  </view>
+
+  <!-- 操作按钮 -->
+  <view class="action-section" wx:if="{{task && task.status === 'in_progress' && !task.contractorId}}">
+    <button class="action-btn primary" bindtap="joinTeam">加入团队</button>
+  </view>
+</view>
+
