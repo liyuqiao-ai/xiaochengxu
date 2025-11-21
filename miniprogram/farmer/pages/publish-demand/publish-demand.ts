@@ -44,62 +44,81 @@ Page({
   },
 
   /**
-   * 获取位置信息
+   * 获取位置信息（自动调用）
    */
   getLocation() {
-    wx.getLocation({
-      type: 'gcj02',
-      success: async (res) => {
-        // 逆地理编码获取地址
-        try {
-          // 使用腾讯地图API进行逆地理编码
-          // 注意：需要在小程序管理后台配置request合法域名
-          const mapKey = 'YOUR_TENCENT_MAP_KEY'; // 需要在配置中设置
-          const url = `https://apis.map.qq.com/ws/geocoder/v1/?location=${res.latitude},${res.longitude}&key=${mapKey}&get_poi=1`;
+    // 页面加载时自动获取位置
+    this.getCurrentLocation();
+  },
 
-          // 由于小程序限制，这里使用云函数调用
-          const result = await wx.cloud.callFunction({
-            name: 'reverseGeocode',
-            data: {
-              latitude: res.latitude,
-              longitude: res.longitude,
-            },
-          });
+  /**
+   * 获取当前位置（手动触发）
+   */
+  async getCurrentLocation() {
+    try {
+      wx.showLoading({ title: '获取位置中...' });
 
-          let address = '位置获取中...';
-          if (result.result.success && result.result.data?.address) {
-            address = result.result.data.address;
-          } else {
-            // 如果云函数调用失败，使用默认地址
-            address = `${res.latitude.toFixed(6)}, ${res.longitude.toFixed(6)}`;
-          }
+      const res = await new Promise<WechatMiniprogram.GetLocationSuccessCallbackResult>((resolve, reject) => {
+        wx.getLocation({
+          type: 'gcj02',
+          success: resolve,
+          fail: reject,
+        });
+      });
 
-          this.setData({
-            location: {
-              lat: res.latitude,
-              lng: res.longitude,
-              address,
-            },
-          });
-        } catch (error) {
-          console.error('获取地址失败:', error);
-          // 如果获取地址失败，使用坐标作为地址
-          this.setData({
-            location: {
-              lat: res.latitude,
-              lng: res.longitude,
-              address: `${res.latitude.toFixed(6)}, ${res.longitude.toFixed(6)}`,
-            },
-          });
+      // 调用逆地理编码获取详细地址
+      let address = '';
+      try {
+        const result = await wx.cloud.callFunction({
+          name: 'reverseGeocode',
+          data: {
+            latitude: res.latitude,
+            longitude: res.longitude,
+          },
+        });
+
+        if (result.result.success && result.result.data?.address) {
+          address = result.result.data.address;
+        } else {
+          // 如果云函数调用失败，使用坐标作为地址
+          address = `${res.latitude.toFixed(6)}, ${res.longitude.toFixed(6)}`;
         }
-      },
-      fail: () => {
+      } catch (error) {
+        console.error('逆地理编码失败:', error);
+        // 如果逆地理编码失败，使用坐标作为地址
+        address = `${res.latitude.toFixed(6)}, ${res.longitude.toFixed(6)}`;
+      }
+
+      this.setData({
+        location: {
+          lat: res.latitude,
+          lng: res.longitude,
+          address,
+        },
+      });
+
+      wx.hideLoading();
+      wx.showToast({
+        title: '位置获取成功',
+        icon: 'success',
+      });
+    } catch (error: any) {
+      wx.hideLoading();
+      console.error('获取位置失败:', error);
+      
+      if (error.errMsg && error.errMsg.includes('auth deny')) {
+        wx.showModal({
+          title: '提示',
+          content: '需要授权位置信息才能发布需求，请在设置中开启位置权限',
+          showCancel: false,
+        });
+      } else {
         wx.showToast({
-          title: '获取位置失败',
+          title: '获取位置失败，请重试',
           icon: 'none',
         });
-      },
-    });
+      }
+    }
   },
 
   /**

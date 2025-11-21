@@ -184,5 +184,79 @@ Page({
       url: `/pages/contractor/member-detail/member-detail?workerId=${workerId}`,
     });
   },
+
+  /**
+   * 查看申请列表
+   */
+  viewApplications() {
+    // 切换到申请标签
+    this.setData({ activeTab: 1 });
+    this.loadData();
+  },
+
+  /**
+   * 添加工人
+   */
+  addMember() {
+    wx.showActionSheet({
+      itemList: ['扫码添加', '搜索添加'],
+      success: (res) => {
+        if (res.tapIndex === 0) {
+          // 扫码添加
+          wx.scanCode({
+            success: async (scanRes) => {
+              const content = scanRes.result;
+              if (!content.startsWith('worker:')) {
+                wx.showToast({
+                  title: '无效的二维码',
+                  icon: 'none',
+                });
+                return;
+              }
+
+              const workerId = content.replace('worker:', '');
+              try {
+                wx.showLoading({ title: '添加中...' });
+                const result = await wx.cloud.callFunction({
+                  name: 'addTeamMember',
+                  data: { workerId },
+                });
+                wx.hideLoading();
+
+                if (result.result.success) {
+                  wx.showToast({ title: '添加成功', icon: 'success' });
+                  this.loadData();
+                } else {
+                  wx.showToast({
+                    title: result.result.error || '添加失败',
+                    icon: 'none',
+                  });
+                }
+              } catch (error) {
+                wx.hideLoading();
+                wx.showToast({ title: '添加失败', icon: 'none' });
+              }
+            },
+          });
+        } else {
+          // 搜索添加
+          wx.showToast({
+            title: '功能开发中',
+            icon: 'none',
+          });
+        }
+      },
+    });
+  },
+
+  /**
+   * 查看团队统计
+   */
+  viewTeamStats() {
+    wx.showToast({
+      title: '功能开发中',
+      icon: 'none',
+    });
+  },
 });
 

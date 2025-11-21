@@ -245,12 +245,69 @@ Page({
   },
 
   /**
-   * 去支付
+   * 立即支付
    */
-  goToPayment() {
-    wx.navigateTo({
-      url: `/pages/farmer/payment/payment?orderId=${this.data.orderId}`,
-    });
+  async makePayment() {
+    const { order } = this.data;
+    if (!order || !order.financials) {
+      wx.showToast({
+        title: '订单信息不完整',
+        icon: 'none',
+      });
+      return;
+    }
+
+    try {
+      wx.showLoading({ title: '创建支付订单...' });
+
+      // 调用云函数创建支付订单
+      const result = await wx.cloud.callFunction({
+        name: 'createPayment',
+        data: {
+          orderId: this.data.orderId,
+          amount: order.financials.totalAmount,
+        },
+      });
+
+      wx.hideLoading();
+
+      if (result.result.success && result.result.data?.paymentParams) {
+        // 调用微信支付
+        const paymentParams = result.result.data.paymentParams;
+        wx.requestPayment({
+          ...paymentParams,
+          success: () => {
+            wx.showToast({
+              title: '支付成功',
+              icon: 'success',
+            });
+            // 刷新订单详情
+            setTimeout(() => {
+              this.loadOrderDetail();
+            }, 1500);
+          },
+          fail: (err) => {
+            console.error('支付失败:', err);
+            wx.showToast({
+              title: '支付失败',
+              icon: 'none',
+            });
+          },
+        });
+      } else {
+        wx.showToast({
+          title: result.result.error || '创建支付订单失败',
+          icon: 'none',
+        });
+      }
+    } catch (error) {
+      wx.hideLoading();
+      console.error('支付失败:', error);
+      wx.showToast({
+        title: '支付失败',
+        icon: 'none',
+      });
+    }
   },
 
   /**

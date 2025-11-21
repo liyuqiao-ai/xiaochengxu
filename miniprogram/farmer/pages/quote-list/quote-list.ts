@@ -177,6 +177,130 @@ Page({
   },
 
   /**
+   * 拒绝报价
+   */
+  async rejectQuote(e: any) {
+    const contractorId = e.currentTarget.dataset.contractorId;
+    const orderId = this.data.orderId;
+
+    wx.showModal({
+      title: '确认拒绝',
+      content: '确定要拒绝此报价吗？',
+      success: async (res) => {
+        if (res.confirm) {
+          try {
+            wx.showLoading({ title: '处理中...' });
+
+            // 调用云函数拒绝报价（将订单状态改回pending，允许其他工头报价）
+            const result = await wx.cloud.callFunction({
+              name: 'rejectQuote',
+              data: {
+                orderId,
+                contractorId,
+              },
+            });
+
+            wx.hideLoading();
+
+            if (result.result.success) {
+              wx.showToast({
+                title: '已拒绝报价',
+                icon: 'success',
+              });
+              // 刷新数据
+              this.loadData();
+            } else {
+              wx.showToast({
+                title: result.result.error || '操作失败',
+                icon: 'none',
+              });
+            }
+          } catch (error) {
+            wx.hideLoading();
+            console.error('拒绝报价失败:', error);
+            wx.showToast({
+              title: '操作失败',
+              icon: 'none',
+            });
+          }
+        }
+      },
+    });
+  },
+
+  /**
+   * 联系工头
+   */
+  async contactContractor(e: any) {
+    const contractorId = e.currentTarget.dataset.contractorId;
+
+    try {
+      wx.showLoading({ title: '获取联系方式...' });
+
+      const result = await wx.cloud.callFunction({
+        name: 'getUserInfo',
+        data: { userId: contractorId },
+      });
+
+      wx.hideLoading();
+
+      if (result.result.success && result.result.data?.user) {
+        const contractor = result.result.data.user;
+        const contactMethods: string[] = [];
+
+        if (contractor.phone) {
+          contactMethods.push('电话');
+        }
+        if (contractor.wechat) {
+          contactMethods.push('微信');
+        }
+
+        if (contactMethods.length === 0) {
+          wx.showToast({
+            title: '工头未设置联系方式',
+            icon: 'none',
+          });
+          return;
+        }
+
+        wx.showActionSheet({
+          itemList: contactMethods,
+          success: (res) => {
+            const method = contactMethods[res.tapIndex];
+            if (method === '电话' && contractor.phone) {
+              wx.makePhoneCall({
+                phoneNumber: contractor.phone,
+              });
+            } else if (method === '微信' && contractor.wechat) {
+              wx.setClipboardData({
+                data: contractor.wechat,
+                success: () => {
+                  wx.showToast({
+                    title: '微信号已复制',
+                    icon: 'success',
+                  });
+                },
+              });
+            }
+          },
+        });
+      } else {
+        wx.showToast({
+          title: '获取联系方式失败',
+          icon: 'none',
+        });
+      }
+    } catch (error) {
+      wx.hideLoading();
+      console.error('联系工头失败:', error);
+      wx.showToast({
+        title: '操作失败',
+        icon: 'none',
+      });
+    }
+  },
+
+  /**
    * 查看订单详情
    */
   viewOrderDetail() {

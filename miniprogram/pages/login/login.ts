@@ -26,24 +26,39 @@ Page({
   },
 
   /**
-   * 微信登录
+   * 微信登录（带重试机制）
    */
-  async wxLogin() {
+  async wxLogin(retryCount = 0) {
+    const MAX_RETRY = 3;
+    
     try {
-      // 1. 获取用户信息
+      wx.showLoading({ title: '登录中...' });
+
+      // 1. 获取微信登录code
       const loginRes = await wx.login();
       if (!loginRes.code) {
-        wx.showToast({
-          title: '登录失败',
-          icon: 'none',
-        });
-        return;
+        throw new Error('获取登录code失败');
       }
 
       // 2. 获取用户信息
-      const userProfile = await wx.getUserProfile({
-        desc: '用于完善用户资料',
-      });
+      let userProfile: any;
+      try {
+        userProfile = await wx.getUserProfile({
+          desc: '用于完善用户资料',
+        });
+      } catch (error: any) {
+        // 用户拒绝授权，提示并返回
+        if (error.errMsg && error.errMsg.includes('deny')) {
+          wx.hideLoading();
+          wx.showModal({
+            title: '提示',
+            content: '需要授权用户信息才能使用完整功能',
+            showCancel: false,
+          });
+          return;
+        }
+        throw error;
+      }
 
       // 3. 调用云函数注册/登录
       const result = await wx.cloud.callFunction({
@@ -54,51 +69,91 @@ Page({
         },
       });
 
+      wx.hideLoading();
+
       if (result.result.success) {
         // 保存用户信息
         const userInfo = result.result.userInfo;
         wx.setStorageSync('userInfo', userInfo);
         wx.setStorageSync('token', result.result.token);
 
-        // 检查是否有选择的角色
-        const selectedRole = wx.getStorageSync('selectedRole');
-        if (selectedRole) {
-          // 如果有选择的角色，跳转到对应角色页面
-          wx.removeStorageSync('selectedRole');
+        wx.showToast({
+          title: '登录成功',
+          icon: 'success',
+        });
+
+        // 延迟跳转，让用户看到成功提示
+        setTimeout(() => {
+          // 检查是否有选择的角色
+          const selectedRole = wx.getStorageSync('selectedRole');
+          if (selectedRole) {
+            // 如果有选择的角色，跳转到对应角色页面
+            wx.removeStorageSync('selectedRole');
+            const roleRoutes: Record<string, string> = {
+              farmer: '/farmer/pages/index/index',
+              contractor: '/contractor/pages/index/index',
+              worker: '/worker/pages/index/index',
+              introducer: '/introducer/pages/index/index',
+            };
+            const route = roleRoutes[selectedRole];
+            if (route) {
+              wx.reLaunch({ url: route });
+              return;
+            }
+          }
+
+          // 根据用户角色跳转
           const roleRoutes: Record<string, string> = {
             farmer: '/farmer/pages/index/index',
             contractor: '/contractor/pages/index/index',
             worker: '/worker/pages/index/index',
             introducer: '/introducer/pages/index/index',
           };
-          const route = roleRoutes[selectedRole];
-          if (route) {
-            wx.reLaunch({ url: route });
-            return;
-          }
-        }
-
-        // 根据用户角色跳转
-        const roleRoutes: Record<string, string> = {
-          farmer: '/farmer/pages/index/index',
-          contractor: '/contractor/pages/index/index',
-          worker: '/worker/pages/index/index',
-          introducer: '/introducer/pages/index/index',
-        };
-        const route = roleRoutes[userInfo.role] || '/pages/entry/entry';
-        wx.reLaunch({ url: route });
+          const route = roleRoutes[userInfo.role] || '/pages/entry/entry';
+          wx.reLaunch({ url: route });
+        }, 1000);
       } else {
-        wx.showToast({
-          title: result.result.error || '登录失败',
-          icon: 'none',
-        });
+        // 登录失败，尝试重试
+        if (retryCount < MAX_RETRY) {
+          wx.showModal({
+            title: '登录失败',
+            content: `登录失败，是否重试？(${retryCount + 1}/${MAX_RETRY})`,
+            success: (res) => {
+              if (res.confirm) {
+                this.wxLogin(retryCount + 1);
+              }
+            },
+          });
+        } else {
+          wx.showToast({
+            title: result.result.error || '登录失败，请稍后重试',
+            icon: 'none',
+            duration: 3000,
+          });
+        }
       }
     } catch (error: any) {
+      wx.hideLoading();
       console.error('登录失败:', error);
-      wx.showToast({
-        title: '登录失败',
-        icon: 'none',
-      });
+      
+      // 网络错误或其他错误，尝试重试
+      if (retryCount < MAX_RETRY) {
+        wx.showModal({
+          title: '登录失败',
+          content: `网络错误，是否重试？(${retryCount + 1}/${MAX_RETRY})`,
+          success: (res) => {
+            if (res.confirm) {
+              this.wxLogin(retryCount + 1);
+            }
+          },
+        });
+      } else {
+        wx.showToast({
+          title: '登录失败，请检查网络后重试',
+          icon: 'none',
+          duration: 3000,
+        });
+      }
     }
   },
 });

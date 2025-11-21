@@ -101,21 +101,21 @@
     </button>
     <button
       class="action-btn primary"
-      wx:if="{{order.status === 'confirmed'}}"
-      bindtap="startWork"
+      wx:if="{{order.status === 'in_progress'}}"
+      bindtap="confirmWorkload"
     >
-      开始工作
+      确认工作量
     </button>
     <button
       class="action-btn primary"
       wx:if="{{order.status === 'completed' && !order.paymentStatus}}"
-      bindtap="goToPayment"
+      bindtap="makePayment"
     >
-      去支付
+      立即支付
     </button>
     <button
       class="action-btn danger"
-      wx:if="{{order.status === 'pending' || order.status === 'quoted' || order.status === 'confirmed'}}"
+      wx:if="{{order.status === 'pending' || order.status === 'quoted'}}"
       bindtap="cancelOrder"
     >
       取消订单

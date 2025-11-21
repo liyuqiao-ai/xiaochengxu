@@ -1,0 +1,34 @@
+<view class="container">
+  <view class="header">
+    <text class="title">数据概览</text>
+    <text class="subtitle">实时监控平台数据</text>
+  </view>
+
+  <!-- 数据统计卡片 -->
+  <view class="stats-cards">
+    <view class="stat-card" bindtap="navigateToUsers">
+      <text class="stat-number">{{stats.totalUsers}}</text>
+      <text class="stat-label">总用户数</text>
+    </view>
+    <view class="stat-card" bindtap="navigateToOrders">
+      <text class="stat-number">{{stats.activeOrders}}</text>
+      <text class="stat-label">进行中订单</text>
+    </view>
+    <view class="stat-card" bindtap="navigateToFinance">
+      <text class="stat-number">{{stats.todayIncome}}</text>
+      <text class="stat-label">今日平台收入(元)</text>
+    </view>
+    <view class="stat-card">
+      <text class="stat-number">{{stats.pendingReviews}}</text>
+      <text class="stat-label">待审核事项</text>
+    </view>
+  </view>
+
+  <!-- 快捷操作 -->
+  <view class="quick-actions">
+    <button class="action-btn" bindtap="navigateToUsers">用户管理</button>
+    <button class="action-btn" bindtap="navigateToOrders">订单监控</button>
+    <button class="action-btn" bindtap="navigateToFinance">财务管理</button>
+  </view>
+</view>
+

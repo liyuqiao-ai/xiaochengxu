@@ -68,10 +68,43 @@ Page({
   },
 
   /**
-   * 根据角色跳转
+   * 根据角色跳转（带权限验证）
    * 严格按照要求：严格跳转到对应subPackage首页
    */
   redirectToRole(role: string) {
+    const userInfo = wx.getStorageSync('userInfo');
+    
+    // 验证用户是否登录
+    if (!userInfo) {
+      wx.showModal({
+        title: '提示',
+        content: '请先登录',
+        showCancel: false,
+        success: () => {
+          wx.reLaunch({
+            url: '/pages/login/login',
+          });
+        },
+      });
+      return;
+    }
+
+    // 验证用户角色权限
+    if (userInfo.role && userInfo.role !== role) {
+      const roleNames: Record<string, string> = {
+        farmer: '农户',
+        contractor: '工头',
+        worker: '工人',
+        introducer: '介绍方',
+      };
+      wx.showModal({
+        title: '权限提示',
+        content: `您的账户角色为${roleNames[userInfo.role] || userInfo.role}，无法访问${roleNames[role] || role}端功能`,
+        showCancel: false,
+      });
+      return;
+    }
+
     // 严格按照多subPackages架构跳转
     const roleRoutes: Record<string, string> = {
       farmer: '/farmer/pages/index/index',

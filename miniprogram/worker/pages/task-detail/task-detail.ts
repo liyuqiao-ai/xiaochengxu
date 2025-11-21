@@ -146,10 +146,86 @@ Page({
                     icon: 'success',
                   });
                 },
+      });
+    }
+  },
+
+  /**
+   * 取消申请
+   */
+  async cancelApplication() {
+    wx.showModal({
+      title: '确认取消',
+      content: '确定要取消入队申请吗？',
+      success: async (res) => {
+        if (res.confirm) {
+          try {
+            wx.showLoading({ title: '处理中...' });
+            // 调用云函数取消申请
+            const result = await wx.cloud.callFunction({
+              name: 'cancelTeamApplication',
+              data: {
+                contractorId: this.data.task.contractorId,
+              },
+            });
+            wx.hideLoading();
+
+            if (result.result.success) {
+              wx.showToast({
+                title: '已取消申请',
+                icon: 'success',
+              });
+              this.setData({
+                hasApplied: false,
+                applicationStatus: '',
+              });
+            } else {
+              wx.showToast({
+                title: result.result.error || '取消失败',
+                icon: 'none',
               });
             }
-          },
+          } catch (error) {
+            wx.hideLoading();
+            console.error('取消申请失败:', error);
+            wx.showToast({
+              title: '取消失败',
+              icon: 'none',
+            });
+          }
+        }
+      },
+    });
+  },
+
+  /**
+   * 导航到工作地点
+   */
+  navigateToLocation() {
+    const { task } = this.data;
+    if (!task || !task.location) {
+      wx.showToast({
+        title: '地点信息不完整',
+        icon: 'none',
+      });
+      return;
+    }
+
+    wx.openLocation({
+      latitude: task.location.lat,
+      longitude: task.location.lng,
+      name: task.location.address || '工作地点',
+      address: task.location.address,
+      fail: (err) => {
+        console.error('打开地图失败:', err);
+        wx.showToast({
+          title: '打开地图失败',
+          icon: 'none',
         });
+      },
+    });
+  },
+});
       } else {
         wx.showToast({
           title: '获取工头信息失败',

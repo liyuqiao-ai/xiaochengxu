@@ -198,5 +198,80 @@ Page({
       url: `/contractor/pages/submit-quote/submit-quote?orderId=${orderId}`,
     });
   },
+
+  /**
+   * 刷新数据
+   */
+  async refreshData() {
+    wx.showLoading({ title: '刷新中...' });
+    await this.loadOrders();
+    wx.hideLoading();
+    wx.showToast({
+      title: '刷新成功',
+      icon: 'success',
+    });
+  },
+
+  /**
+   * 扫码添加工人
+   */
+  scanWorker() {
+    wx.scanCode({
+      success: async (res) => {
+        try {
+          // 解析二维码内容（假设格式为：worker:workerId）
+          const content = res.result;
+          if (!content.startsWith('worker:')) {
+            wx.showToast({
+              title: '无效的二维码',
+              icon: 'none',
+            });
+            return;
+          }
+
+          const workerId = content.replace('worker:', '');
+          wx.showLoading({ title: '添加工人中...' });
+
+          // 调用云函数添加工人到团队
+          const result = await wx.cloud.callFunction({
+            name: 'addTeamMember',
+            data: {
+              workerId,
+            },
+          });
+
+          wx.hideLoading();
+
+          if (result.result.success) {
+            wx.showToast({
+              title: '添加成功',
+              icon: 'success',
+            });
+            // 刷新团队数据
+            this.loadOrders();
+          } else {
+            wx.showToast({
+              title: result.result.error || '添加失败',
+              icon: 'none',
+            });
+          }
+        } catch (error) {
+          wx.hideLoading();
+          console.error('扫码添加工人失败:', error);
+          wx.showToast({
+            title: '添加失败',
+            icon: 'none',
+          });
+        }
+      },
+      fail: (err) => {
+        console.error('扫码失败:', err);
+        wx.showToast({
+          title: '扫码失败',
+          icon: 'none',
+        });
+      },
+    });
+  },
 });
 

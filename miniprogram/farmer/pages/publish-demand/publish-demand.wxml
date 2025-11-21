@@ -69,11 +69,12 @@
       </view>
     </block>
 
-    <view class="form-item" bindtap="selectLocation">
+    <view class="form-item">
       <text class="label">工作地点</text>
-      <view class="location-wrapper">
-        <text class="location-text">{{location ? location.address : '点击选择地点'}}</text>
-        <text class="location-icon">📍</text>
+      <view class="location-section">
+        <text class="location-text">{{location ? location.address : '点击按钮获取位置'}}</text>
+        <button class="location-btn" size="mini" bindtap="getCurrentLocation">获取当前位置</button>
+        <button class="location-btn" size="mini" bindtap="selectLocation">选择其他地点</button>
       </view>
     </view>
   </view>

@@ -1,0 +1,35 @@
+<view class="container">
+  <view class="login-header">
+    <text class="title">管理后台</text>
+    <text class="subtitle">农业零工数字化平台</text>
+  </view>
+
+  <view class="login-form">
+    <view class="form-item">
+      <text class="label">用户名</text>
+      <input
+        class="input"
+        type="text"
+        placeholder="请输入管理员用户名"
+        value="{{username}}"
+        bindinput="onUsernameInput"
+      />
+    </view>
+
+    <view class="form-item">
+      <text class="label">密码</text>
+      <input
+        class="input"
+        type="password"
+        placeholder="请输入密码"
+        value="{{password}}"
+        bindinput="onPasswordInput"
+      />
+    </view>
+
+    <button class="login-btn" bindtap="adminLogin" loading="{{loading}}">
+      登录
+    </button>
+  </view>
+</view>
+

@@ -39,6 +39,12 @@
         <button class="btn-accept" size="mini" bindtap="acceptQuote" data-contractor-id="{{item.contractorId}}">
           接受报价
         </button>
+        <button class="btn-reject" size="mini" bindtap="rejectQuote" data-contractor-id="{{item.contractorId}}">
+          拒绝
+        </button>
+        <button class="btn-contact" size="mini" bindtap="contactContractor" data-contractor-id="{{item.contractorId}}">
+          联系工头
+        </button>
       </view>
     </view>
   </view>
