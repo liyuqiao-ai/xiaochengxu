@@ -5,6 +5,7 @@
 import { JWTPayload, verifyToken, extractToken } from '../utils/jwt';
 import { createErrorResponse, ErrorCode } from '../utils/errors';
 import { ApiResponse } from '../utils/errors';
+import { createDatabase } from '../utils/db';
 
 /**
  * 认证上下文
@@ -78,6 +79,53 @@ export function requireRole(allowedRoles: string[]) {
 }
 
 /**
+ * 验证订单访问权限
+ * @param userId 用户ID
+ * @param orderId 订单ID
+ * @returns 是否有权限访问此订单
+ */
+export async function validateOrderAccess(userId: string, orderId: string): Promise<{
+  success: boolean;
+  error?: string;
+  order?: any;
+}> {
+  try {
+    const db = createDatabase();
+
+    // 1. 获取订单
+    const order = await db.getDoc('orders', orderId);
+    if (!order) {
+      return {
+        success: false,
+        error: '订单不存在',
+      };
+    }
+
+    // 2. 检查用户是否是订单相关的用户
+    const isFarmer = order.farmerId === userId;
+    const isContractor = order.contractorId === userId;
+    const isIntroducer = order.introducerId === userId;
+
+    if (!isFarmer && !isContractor && !isIntroducer) {
+      return {
+        success: false,
+        error: '无权访问此订单',
+      };
+    }
+
+    return {
+      success: true,
+      order,
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      error: error.message || '验证订单权限失败',
+    };
+  }
+}
+
+/**
  * 组合中间件
  */
 export function combineMiddleware(
@@ -101,4 +149,3 @@ export function combineMiddleware(
     return { context };
   };
 }
-

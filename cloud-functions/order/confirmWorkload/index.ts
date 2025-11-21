@@ -35,11 +35,11 @@ export const main = async (event: any) => {
   try {
     // 1. 参数验证
     if (!orderId || !actualWorkload || !confirmedBy) {
-      return createInvalidParamsResponse('缺少必要参数');
+      return { success: false, error: '缺少必要参数' };
     }
 
-    if (confirmedBy !== 'farmer' && confirmedBy !== 'contractor') {
-      return createInvalidParamsResponse('无效的确认方');
+    if (!['farmer', 'contractor'].includes(confirmedBy)) {
+      return { success: false, error: '无效的确认方' };
     }
 
     // 2. 获取订单
