@@ -23,6 +23,9 @@ export interface BaseUser {
   nickName: string;
   role: UserRole;
   status: UserStatus;
+  balance: number; // 账户余额（分）
+  frozenBalance?: number; // 冻结余额（分），用于提现等场景
+  merchantId?: string; // 商户号（用于分账，工头需要）
   createdAt: Date;
   updatedAt: Date;
 }

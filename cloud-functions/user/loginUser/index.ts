@@ -30,29 +30,9 @@ export const main = async (event: any) => {
       return createInvalidParamsResponse('缺少必要参数');
     }
 
-    // 2. 通过code获取openid
-    // 方式1：直接使用云函数上下文获取（推荐）
+    // 2. 通过云函数上下文获取openid（推荐方式）
     const wxContext = cloud.getWXContext();
-    let openid = wxContext.OPENID;
-
-    // 方式2：如果上下文无法获取，调用getOpenId云函数
-    if (!openid) {
-      try {
-        const loginResult = await cloud.callFunction({
-          name: 'getOpenId',
-          data: { code },
-        });
-
-        if (!loginResult.result?.success || !loginResult.result?.data?.openid) {
-          return createErrorResponse(ErrorCode.LOGIN_FAILED, '获取用户信息失败');
-        }
-
-        openid = loginResult.result.data.openid;
-      } catch (error: any) {
-        console.error('调用getOpenId失败:', error);
-        return createErrorResponse(ErrorCode.LOGIN_FAILED, '获取用户信息失败');
-      }
-    }
+    const openid = wxContext.OPENID;
 
     if (!openid) {
       return createErrorResponse(ErrorCode.LOGIN_FAILED, '无法获取用户openid');
@@ -73,19 +53,25 @@ export const main = async (event: any) => {
         ...userInfo,
       };
     } else {
-      // 新用户，创建记录
+      // 新用户，创建记录（role为空，等待用户选择）
       userId = await db.addDoc('users', {
         openid,
         ...userInfo,
-        role: 'farmer', // 默认角色，后续可修改
-        status: 'pending',
+        role: '', // 空角色，等待用户选择
+        status: 'active',
+        balance: 0, // 初始余额为0
+        createdAt: new Date(),
+        updatedAt: new Date(),
       });
       userData = {
         _id: userId,
         openid,
         ...userInfo,
-        role: 'farmer',
-        status: 'pending',
+        role: '', // 空角色，等待用户选择
+        status: 'active',
+        balance: 0,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       };
     }
 

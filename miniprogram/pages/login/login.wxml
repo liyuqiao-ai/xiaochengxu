@@ -1,44 +1,53 @@
-<view class="container">
+<view class="login-container">
   <view class="logo">
-    <view class="logo-icon">🌾</view>
-    <text class="logo-text">农业零工平台</text>
+    <view class="platform-name">农业零工平台</view>
+    <view class="platform-subtitle">农业零工平台</view>
   </view>
 
-  <!-- 登录方式切换 -->
-  <view class="login-tabs">
-    <view 
-      class="tab-item {{loginType === 'wechat' ? 'active' : ''}}"
-      bindtap="switchLoginType"
-      data-type="wechat"
-    >
-      微信登录
-    </view>
-    <view 
-      class="tab-item {{loginType === 'phone' ? 'active' : ''}}"
-      bindtap="switchLoginType"
-      data-type="phone"
-    >
-      手机登录
-    </view>
-  </view>
-
-  <!-- 微信登录 -->
-  <view class="login-form" wx:if="{{loginType === 'wechat'}}">
+  <!-- 登录选项 -->
+  <view class="login-options">
+    <!-- 微信登录（需要授权） -->
     <button 
-      class="login-btn" 
+      class="login-btn wechat-login"
       open-type="getUserProfile"
       bindgetuserprofile="onGetUserProfile"
       bindtap="wxLogin"
-      loading="{{loading}}"
       disabled="{{loading}}"
     >
-      {{loading ? '登录中...' : '微信一键登录'}}
+      <view class="icon wechat-icon">💬</view>
+      <text>微信登录</text>
     </button>
-    <text class="error-text" wx:if="{{loginError}}">{{loginError}}</text>
+
+    <!-- 手机登录 -->
+    <button 
+      class="login-btn phone-login"
+      bindtap="showPhoneLogin"
+      disabled="{{loading}}"
+    >
+      <view class="icon phone-icon">📱</view>
+      <text>手机登录</text>
+    </button>
+
+    <!-- 微信一键登录（快速登录） -->
+    <button 
+      class="login-btn wechat-quick"
+      open-type="getUserProfile"
+      bindgetuserprofile="onGetUserProfile"
+      bindtap="wxQuickLogin"
+      disabled="{{loading}}"
+    >
+      <view class="icon wechat-icon-white">💬</view>
+      <text>微信一键登录</text>
+    </button>
   </view>
 
-  <!-- 手机号登录 -->
-  <view class="login-form phone-login" wx:if="{{loginType === 'phone'}}">
+  <!-- 手机号登录表单（弹窗或展开） -->
+  <view class="phone-login-form {{showPhoneForm ? 'show' : ''}}" wx:if="{{showPhoneForm}}">
+    <view class="form-header">
+      <text class="form-title">手机号登录</text>
+      <view class="close-btn" bindtap="hidePhoneLogin">✕</view>
+    </view>
+    
     <view class="form-item">
       <text class="label">手机号</text>
       <input
@@ -74,18 +83,28 @@
     </view>
 
     <button
-      class="login-btn"
+      class="submit-btn"
       bindtap="phoneLogin"
       loading="{{loading}}"
       disabled="{{loading}}"
     >
       {{loading ? '登录中...' : '登录'}}
     </button>
+    
     <text class="error-text" wx:if="{{loginError}}">{{loginError}}</text>
   </view>
 
-  <view class="tips">
-    <text>登录即表示同意《用户协议》和《隐私政策》</text>
+  <!-- 用户协议 -->
+  <view class="agreement">
+    <text>登录即表示同意</text>
+    <text class="link" bindtap="viewAgreement">《用户协议》</text>
+    <text>和</text>
+    <text class="link" bindtap="viewPrivacy">《隐私政策》</text>
+  </view>
+
+  <!-- 错误提示 -->
+  <view class="error-toast" wx:if="{{errorMessage}}">
+    <text>{{errorMessage}}</text>
   </view>
 </view>
 

@@ -56,6 +56,7 @@ function generateSign(params: Record<string, any>, key: string): string {
 
 /**
  * 调用微信支付分账API
+ * 注意：分账接口需要使用SSL证书进行双向认证
  */
 async function profitSharing(params: {
   appid: string;
@@ -64,22 +65,43 @@ async function profitSharing(params: {
   out_order_no: string;
   receivers: string; // JSON字符串
   key: string;
+  certPath?: string; // 证书文件路径
+  keyPath?: string; // 私钥文件路径
 }): Promise<any> {
   const sign = generateSign(params, params.key);
   const xml = generateXML({ ...params, sign });
 
   const https = require('https');
+  const fs = require('fs');
+  
+  // 配置SSL证书（如果提供）
+  const httpsOptions: any = {
+    hostname: 'api.mch.weixin.qq.com',
+    path: '/secapi/pay/profitsharing',
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/xml',
+      'Content-Length': Buffer.byteLength(xml),
+    },
+  };
+
+  // 如果提供了证书路径，加载证书
+  if (params.certPath && params.keyPath) {
+    try {
+      httpsOptions.cert = fs.readFileSync(params.certPath);
+      httpsOptions.key = fs.readFileSync(params.keyPath);
+    } catch (error) {
+      console.error('加载SSL证书失败:', error);
+      throw new Error('SSL证书加载失败，无法调用分账接口');
+    }
+  } else {
+    // 如果没有证书，尝试从环境变量或云存储获取
+    // 注意：在生产环境中，证书应该存储在云存储中，通过云存储API获取
+    console.warn('未配置SSL证书，分账接口可能调用失败');
+  }
+
   return new Promise((resolve, reject) => {
-    const options = {
-      hostname: 'api.mch.weixin.qq.com',
-      path: '/secapi/pay/profitsharing',
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/xml',
-        'Content-Length': Buffer.byteLength(xml),
-      },
-      // 分账接口需要证书，这里简化处理
-    };
+    const options = httpsOptions;
 
     const req = https.request(options, (res: any) => {
       let data = '';
@@ -159,27 +181,51 @@ export const main = async (event: any) => {
     if (order.contractorId && financials.contractorIncome > 0) {
       // 获取工头的商户号或openid
       const contractor = await db.getDoc('users', order.contractorId);
-      if (contractor) {
-        receivers.push({
-          type: 'MERCHANT_ID', // 或 'PERSONAL_OPENID'
-          account: contractor.openid || contractor.merchantId || order.contractorId,
-          amount: financials.contractorIncome,
-          description: '工头劳务费',
-        });
+      if (!contractor) {
+        return createErrorResponse(ErrorCode.USER_NOT_FOUND, '工头信息不存在');
       }
+
+      // 验证分账账户：必须要有merchantId或openid
+      if (!contractor.merchantId && !contractor.openid) {
+        return createErrorResponse(
+          ErrorCode.INVALID_PARAMS,
+          '工头未设置分账账户，无法进行分账。请工头先设置商户号或绑定微信账号'
+        );
+      }
+
+      // 优先使用merchantId，如果没有则使用openid
+      const account = contractor.merchantId || contractor.openid;
+      receivers.push({
+        type: contractor.merchantId ? 'MERCHANT_ID' : 'PERSONAL_OPENID',
+        account: account,
+        amount: financials.contractorIncome,
+        description: '工头劳务费',
+      });
     }
 
     // 介绍方佣金
     if (order.introducerId && financials.introducerCommission > 0) {
       const introducer = await db.getDoc('users', order.introducerId);
-      if (introducer) {
-        receivers.push({
-          type: 'MERCHANT_ID', // 或 'PERSONAL_OPENID'
-          account: introducer.openid || introducer.merchantId || order.introducerId,
-          amount: financials.introducerCommission,
-          description: '介绍方佣金',
-        });
+      if (!introducer) {
+        return createErrorResponse(ErrorCode.USER_NOT_FOUND, '介绍方信息不存在');
       }
+
+      // 验证分账账户：必须要有merchantId或openid
+      if (!introducer.merchantId && !introducer.openid) {
+        return createErrorResponse(
+          ErrorCode.INVALID_PARAMS,
+          '介绍方未设置分账账户，无法进行分账。请介绍方先设置商户号或绑定微信账号'
+        );
+      }
+
+      // 优先使用merchantId，如果没有则使用openid
+      const account = introducer.merchantId || introducer.openid;
+      receivers.push({
+        type: introducer.merchantId ? 'MERCHANT_ID' : 'PERSONAL_OPENID',
+        account: account,
+        amount: financials.introducerCommission,
+        description: '介绍方佣金',
+      });
     }
 
     // 6. 执行分账（如果有接收方）
@@ -194,6 +240,10 @@ export const main = async (event: any) => {
         console.warn('微信支付配置不完整，跳过分账API调用');
       } else {
         try {
+          // 获取证书路径（从环境变量或云存储）
+          const certPath = process.env.WX_PAY_CERT_PATH || '';
+          const keyPath = process.env.WX_PAY_KEY_PATH || '';
+
           const settlementResult = await profitSharing({
             appid: wxPayConfig.appid,
             mch_id: wxPayConfig.mch_id,
@@ -201,6 +251,8 @@ export const main = async (event: any) => {
             out_order_no: `SETTLEMENT_${orderId}_${Date.now()}`,
             receivers: JSON.stringify(receivers),
             key: wxPayConfig.key,
+            certPath: certPath || undefined,
+            keyPath: keyPath || undefined,
           });
 
           if (!settlementResult.success) {
@@ -234,16 +286,28 @@ export const main = async (event: any) => {
     });
 
     // 9. 更新工头和介绍方的账户余额（如果需要）
+    // 注意：如果分账成功，余额通过微信支付分账直接到账，这里只记录到账户余额
+    // 如果分账失败或未配置，则直接增加到账户余额
     if (order.contractorId && financials.contractorIncome > 0) {
-      await db.updateDoc('users', order.contractorId, {
-        $inc: { balance: financials.contractorIncome },
-      });
+      const contractor = await db.getDoc('users', order.contractorId);
+      if (contractor) {
+        const currentBalance = contractor.balance || 0;
+        await db.updateDoc('users', order.contractorId, {
+          balance: currentBalance + financials.contractorIncome,
+          updatedAt: new Date(),
+        });
+      }
     }
 
     if (order.introducerId && financials.introducerCommission > 0) {
-      await db.updateDoc('users', order.introducerId, {
-        $inc: { balance: financials.introducerCommission },
-      });
+      const introducer = await db.getDoc('users', order.introducerId);
+      if (introducer) {
+        const currentBalance = introducer.balance || 0;
+        await db.updateDoc('users', order.introducerId, {
+          balance: currentBalance + financials.introducerCommission,
+          updatedAt: new Date(),
+        });
+      }
     }
 
     return createSuccessResponse({

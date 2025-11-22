@@ -79,13 +79,17 @@ export const main = async (event: any) => {
 
     if (user.data.length === 0) {
       // 新用户，创建账户
+      const wxContext = cloud.getWXContext();
       const newUser = {
         phone: phone,
-        role: '', // 需要后续选择角色
+        openid: wxContext.OPENID || '', // 从微信上下文获取openid（如果有）
+        nickName: `用户${phone.slice(-4)}`, // 默认昵称
+        avatarUrl: '', // 默认头像为空，后续可上传
+        role: '', // 空角色，等待用户选择
+        status: 'active',
+        balance: 0, // 初始余额为0
         createdAt: now,
         updatedAt: now,
-        // 从微信上下文获取openid（如果有）
-        openid: cloud.getWXContext().OPENID || '',
       };
 
       const addResult = await db.collection('users').add({
@@ -124,9 +128,12 @@ export const main = async (event: any) => {
       userInfo: {
         _id: userData._id,
         phone: userData.phone,
-        role: userData.role,
+        openid: userData.openid || '',
         nickName: userData.nickName || `用户${userData.phone.slice(-4)}`,
         avatarUrl: userData.avatarUrl || '',
+        role: userData.role || '',
+        status: userData.status || 'active',
+        balance: userData.balance || 0,
         realName: userData.realName || '',
         creditScore: userData.creditScore || 100,
         createdAt: userData.createdAt,

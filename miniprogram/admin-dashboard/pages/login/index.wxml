@@ -1,0 +1,39 @@
+<view class="login-container">
+  <view class="login-header">
+    <text class="login-title">农业零工平台</text>
+    <text class="login-subtitle">管理后台</text>
+  </view>
+
+  <view class="login-form">
+    <view class="form-group">
+      <text class="form-label">管理员账号</text>
+      <input
+        class="form-input"
+        type="text"
+        placeholder="请输入管理员账号"
+        value="{{username}}"
+        bindinput="onUsernameInput"
+      />
+    </view>
+
+    <view class="form-group">
+      <text class="form-label">密码</text>
+      <input
+        class="form-input"
+        type="password"
+        placeholder="请输入密码"
+        value="{{password}}"
+        bindinput="onPasswordInput"
+      />
+    </view>
+
+    <button class="login-btn" bindtap="onLogin" disabled="{{loading}}">
+      {{loading ? '登录中...' : '登录'}}
+    </button>
+
+    <text class="login-error" wx:if="{{errorMessage}}">
+      {{errorMessage}}
+    </text>
+  </view>
+</view>
+

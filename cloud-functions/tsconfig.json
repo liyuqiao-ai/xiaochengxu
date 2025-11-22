@@ -1,23 +1,26 @@
 {
+  "extends": "../tsconfig.json",
   "compilerOptions": {
-    "target": "ES2020",
+    "outDir": "./dist",
+    "rootDir": ".",
     "module": "commonjs",
-    "lib": ["ES2020"],
-    "types": [],
-    "strict": true,
+    "target": "ES2018",
+    "lib": ["ES2018"],
+    "moduleResolution": "node",
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
+    "strict": true,
     "resolveJsonModule": true,
-    "moduleResolution": "node",
-    "declaration": true,
-    "outDir": "./dist",
-    "rootDir": "../..",
-    "baseUrl": "../..",
-    "paths": {
-      "@shared/*": ["shared/*"]
-    }
+    "declaration": false,
+    "sourceMap": false
   },
-  "include": ["./**/*", "../shared/**/*"],
-  "exclude": ["node_modules", "dist"]
+  "include": [
+    "./**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "**/*.test.ts",
+    "**/*.spec.ts"
+  ]
 }

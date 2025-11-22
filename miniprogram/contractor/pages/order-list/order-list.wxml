@@ -1,28 +1,52 @@
 <view class="container">
   <!-- 筛选栏 -->
-  <view class="filter-section">
-    <view class="filter-group">
+  <view class="filter-container">
+    <view class="filter-section">
       <text class="filter-label">工种筛选:</text>
-      <picker mode="selector" range="{{jobTypes}}" range-key="name" value="{{jobTypeIndex}}" bindchange="onJobTypeChange">
-        <view class="picker">{{jobTypes[jobTypeIndex]?.name || '全部工种'}}</view>
+      <picker 
+        class="filter-picker" 
+        range="{{jobTypes}}" 
+        range-key="name"
+        value="{{jobTypeIndex}}" 
+        bindchange="onJobTypeChange"
+      >
+        <view class="picker-display">
+          {{jobTypes[jobTypeIndex]?.name || '全部工种'}}
+        </view>
       </picker>
     </view>
     
-    <view class="filter-group">
+    <view class="filter-section">
       <text class="filter-label">距离排序:</text>
-      <picker mode="selector" range="{{distanceOptions}}" value="{{distanceIndex}}" bindchange="onDistanceChange">
-        <view class="picker">{{distanceOptions[distanceIndex]}}</view>
+      <picker 
+        class="filter-picker"
+        range="{{distanceOptions}}" 
+        value="{{distanceIndex}}" 
+        bindchange="onDistanceChange"
+      >
+        <view class="picker-display">
+          {{distanceOptions[distanceIndex] || '距离排序'}}
+        </view>
       </picker>
     </view>
     
-    <view class="filter-group">
+    <view class="filter-section">
       <text class="filter-label">价格范围:</text>
-      <picker mode="selector" range="{{priceRanges}}" value="{{priceIndex}}" bindchange="onPriceChange">
-        <view class="picker">{{priceRanges[priceIndex]}}</view>
+      <picker 
+        class="filter-picker"
+        range="{{priceRanges}}" 
+        value="{{priceIndex}}" 
+        bindchange="onPriceChange"
+      >
+        <view class="picker-display">
+          {{priceRanges[priceIndex] || '价格范围'}}
+        </view>
       </picker>
     </view>
     
-    <button class="btn-clear" size="mini" bindtap="clearFilters">清除筛选</button>
+    <button class="btn-clear-filters" bindtap="clearAllFilters">
+      清除筛选
+    </button>
   </view>
 
   <!-- 订单列表 -->

@@ -5,7 +5,7 @@
 import { cloud } from 'wx-server-sdk';
 import { createDatabase } from '../../../shared/utils/db';
 import { OrderStateMachine } from '../../../shared/utils/orderStateMachine';
-import { PricingEngine } from '../../settlement/calculatePayment/index';
+import { PricingEngine } from '../../../shared/utils/pricing';
 import { authMiddleware, validateOrderAccess } from '../../../shared/middleware/auth';
 
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV });

@@ -1,20 +1,23 @@
-<view class="container">
-  <!-- 团队头部 -->
-  <view class="team-header">
-    <text class="team-title">团队管理</text>
-    <button class="btn-scan" size="mini" bindtap="scanAddMember">扫码添加工人</button>
-  </view>
-
-  <!-- 团队统计 -->
-  <view class="team-stats">
-    <view class="stat-card">
-      <text class="stat-number">{{teamStats.totalMembers || 0}}</text>
-      <text class="stat-label">团队成员</text>
+<view class="team-management">
+  <!-- 团队概览 -->
+  <view class="team-overview">
+    <view class="overview-stats">
+      <view class="stat-item">
+        <text class="stat-number">{{teamStats.totalMembers || 0}}</text>
+        <text class="stat-label">团队成员</text>
+      </view>
+      <view class="stat-item">
+        <text class="stat-number">{{teamStats.activeMembers || 0}}</text>
+        <text class="stat-label">在线成员</text>
+      </view>
+      <view class="stat-item">
+        <text class="stat-number">{{teamStats.pendingRequests || 0}}</text>
+        <text class="stat-label">待审核</text>
+      </view>
     </view>
-    <view class="stat-card">
-      <text class="stat-number">{{teamStats.pendingRequests || 0}}</text>
-      <text class="stat-label">待审核申请</text>
-    </view>
+    <button class="btn-scan-member" bindtap="scanToAddMember">
+      📷 扫码添加工人
+    </button>
   </view>
 
   <!-- 标签页 -->
@@ -32,82 +35,93 @@
   </view>
 
   <!-- 团队成员列表 -->
-  <view class="team-sections">
-    <view class="section" wx:if="{{activeTab === 0}}">
-      <text class="section-title">团队成员</text>
-      <view class="member-list">
-        <view
-          class="member-item"
-          wx:for="{{teamMembers}}"
-          wx:key="_id"
-        >
-          <image class="avatar" src="{{item.avatarUrl}}" mode="aspectFill"></image>
-          <view class="member-info">
-            <text class="member-name">{{item.realName || item.nickName}}</text>
-            <text class="member-skills">{{item.skills ? item.skills.join(', ') : '暂无技能'}}</text>
-            <text class="member-score">信用分: {{item.creditScore || 0}}</text>
-          </view>
-          <view class="member-actions">
-            <button
-              class="btn-assign"
-              size="mini"
-              bindtap="assignTask"
-              data-member-id="{{item._id}}"
-            >
-              分配任务
-            </button>
-            <button
-              class="btn-remove"
-              size="mini"
-              bindtap="removeMember"
-              data-member-id="{{item._id}}"
-            >
-              移除
-            </button>
-          </view>
+  <view class="team-members-section">
+    <view class="section-header">
+      <text class="section-title">团队成员 ({{teamMembers.length}})</text>
+      <button class="btn-invite" bindtap="generateInviteLink">生成邀请链接</button>
+    </view>
+    <view class="member-list">
+      <view
+        class="member-item"
+        wx:for="{{teamMembers}}"
+        wx:key="_id"
+      >
+        <image class="member-avatar" src="{{item.avatarUrl}}" mode="aspectFill"></image>
+        <view class="member-info">
+          <text class="member-name">{{item.realName || item.nickName}}</text>
+          <text class="member-skills">技能: {{item.skills ? item.skills.join(', ') : '暂无技能'}}</text>
+          <text class="member-stats">
+            信用分: {{item.creditScore || 0}} | 完成订单: {{item.completedOrders || 0}}
+          </text>
+          <text class="member-status {{item.status || 'offline'}}">
+            {{item.status === 'online' ? '在线' : '离线'}}
+          </text>
         </view>
-        <view class="empty" wx:if="{{teamMembers.length === 0 && !loading}}">
-          暂无团队成员
+        <view class="member-actions">
+          <button
+            class="btn-assign"
+            bindtap="assignTask"
+            data-member-id="{{item._id}}"
+          >
+            📋 分配任务
+          </button>
+          <button
+            class="btn-chat"
+            bindtap="chatWithMember"
+            data-member-id="{{item._id}}"
+          >
+            💬 联系
+          </button>
+          <button
+            class="btn-remove"
+            bindtap="removeMember"
+            data-member-id="{{item._id}}"
+          >
+            🗑️ 移除
+          </button>
         </view>
       </view>
     </view>
+  </view>
 
     <!-- 待审核申请 -->
-    <view class="section" wx:if="{{activeTab === 1}}">
-      <text class="section-title">待审核申请</text>
+    <view class="pending-requests-section">
+      <view class="section-header">
+        <text class="section-title">待审核申请 ({{pendingRequests.length}})</text>
+        <button class="btn-view-all" bindtap="viewAllRequests">查看全部</button>
+      </view>
       <view class="request-list">
         <view
           class="request-item"
           wx:for="{{pendingRequests}}"
           wx:key="_id"
         >
-          <image class="avatar" src="{{item.workerAvatar || item.avatarUrl}}" mode="aspectFill"></image>
-          <view class="request-info">
-            <text class="worker-name">{{item.workerName || item.nickName}}</text>
-            <text class="request-time">{{item.createdAt}}</text>
-            <text class="request-message">{{item.message || '申请加入您的团队'}}</text>
+          <image class="applicant-avatar" src="{{item.workerAvatar || item.avatarUrl}}" mode="aspectFill"></image>
+          <view class="request-details">
+            <text class="applicant-name">{{item.workerName || item.nickName}}</text>
+            <text class="applicant-skills">{{item.skills ? item.skills.join(', ') : '暂无技能'}}</text>
+            <text class="request-time">申请时间: {{item.applyTime || item.createdAt}}</text>
+            <text class="request-message">留言: {{item.message || '暂无留言'}}</text>
           </view>
           <view class="request-actions">
             <button
               class="btn-approve"
-              size="mini"
               bindtap="approveRequest"
               data-request-id="{{item._id}}"
             >
-              同意
+              ✅ 同意
             </button>
             <button
               class="btn-reject"
-              size="mini"
               bindtap="rejectRequest"
               data-request-id="{{item._id}}"
             >
-              拒绝
+              ❌ 拒绝
             </button>
           </view>
         </view>
-        <view class="empty" wx:if="{{pendingRequests.length === 0 && !loading}}">
-          暂无入队申请
+        <view class="empty-state" wx:if="{{pendingRequests.length === 0}}">
+          <text>暂无待审核申请</text>
         </view>
       </view>
     </view>

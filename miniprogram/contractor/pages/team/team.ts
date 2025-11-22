@@ -261,6 +261,13 @@ Page({
   /**
    * 扫码添加工人
    */
+  scanToAddMember() {
+    this.scanAddMember();
+  },
+
+  /**
+   * 扫码添加工人
+   */
   scanAddMember() {
     wx.scanCode({
       success: async (res) => {
@@ -338,6 +345,34 @@ Page({
       title: '功能开发中',
       icon: 'none',
     });
+  },
+
+  /**
+   * 生成邀请链接
+   */
+  generateInviteLink() {
+    wx.showToast({
+      title: '功能开发中',
+      icon: 'none',
+    });
+  },
+
+  /**
+   * 联系成员
+   */
+  chatWithMember(e: any) {
+    const memberId = e.currentTarget.dataset.memberId;
+    wx.showToast({
+      title: '功能开发中',
+      icon: 'none',
+    });
+  },
+
+  /**
+   * 查看全部申请
+   */
+  viewAllRequests() {
+    this.setData({ activeTab: 1 });
   },
 });
 

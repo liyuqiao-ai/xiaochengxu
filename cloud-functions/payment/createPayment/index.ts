@@ -11,7 +11,7 @@ import {
   ErrorCode,
 } from '../../../shared/utils/errors';
 import { authMiddleware } from '../../../shared/middleware/auth';
-import { PricingEngine } from '../../settlement/calculatePayment/index';
+import { PricingEngine } from '../../../shared/utils/pricing';
 
 cloud.init({
   env: cloud.DYNAMIC_CURRENT_ENV,
@@ -165,6 +165,7 @@ export const main = async (event: any) => {
       return createErrorResponse(ErrorCode.USER_NOT_AUTHORIZED, '无权支付此订单');
     }
 
+    // 4.1 检查订单状态
     if (order.status !== 'completed') {
       return createErrorResponse(
         ErrorCode.ORDER_STATUS_INVALID,
@@ -172,7 +173,15 @@ export const main = async (event: any) => {
       );
     }
 
-    // 检查是否已支付
+    // 4.2 检查工作量是否已双方确认
+    if (!order.confirmedByFarmer || !order.confirmedByContractor) {
+      return createErrorResponse(
+        ErrorCode.ORDER_STATUS_INVALID,
+        '工作量未确认，无法支付。请等待双方确认工作量'
+      );
+    }
+
+    // 4.3 检查是否已支付
     const existingPayments = await db.queryDocs('payments', { orderId, status: 'paid' });
     if (existingPayments.length > 0) {
       return createErrorResponse(ErrorCode.PAYMENT_FAILED, '订单已支付');

@@ -7,8 +7,9 @@ Page({
     canIUse: wx.canIUse('button.open-type.getUserInfo'),
     loading: false,
     loginError: '',
+    errorMessage: '', // 统一错误消息字段
     loginCode: '', // 保存登录 code
-    loginType: 'wechat', // 登录方式：wechat 或 phone
+    showPhoneForm: false, // 是否显示手机号登录表单
     phone: '', // 手机号
     verifyCode: '', // 验证码
     countdown: 0, // 倒计时
@@ -34,44 +35,42 @@ Page({
   },
 
   /**
-   * 处理微信登录 - 先获取 code
+   * 处理微信登录
    */
-  wxLogin() {
-    this.setData({ loading: true, loginError: '' });
-    
-    // 先获取 code
-    wx.login({
-      success: (res) => {
-        if (res.code) {
-          console.log('登录code:', res.code);
-          // 保存 code，等待 getUserProfile 获取用户信息后一起发送
-          this.setData({
-            loginCode: res.code,
-          });
-        } else {
-          console.log('登录失败: 未获取到 code');
-          this.setData({
-            loading: false,
-            loginError: '获取登录凭证失败',
-          });
-          wx.showToast({
-            title: '登录失败',
-            icon: 'none',
-          });
-        }
-      },
-      fail: (err: any) => {
-        console.error('wx.login 失败:', err);
-        this.setData({
-          loading: false,
-          loginError: '获取登录凭证失败',
+  async wxLogin() {
+    if (this.data.loading) return;
+
+    this.setData({ loading: true, errorMessage: '', loginError: '' });
+
+    try {
+      // 1. 获取微信登录code
+      const loginRes: any = await new Promise((resolve, reject) => {
+        wx.login({
+          success: resolve,
+          fail: reject,
         });
-        wx.showToast({
-          title: '登录失败',
-          icon: 'none',
-        });
-      },
-    });
+      });
+      
+      if (!loginRes.code) {
+        throw new Error('获取登录code失败');
+      }
+
+      // 保存 code，等待 getUserProfile 获取用户信息后一起发送
+      this.setData({
+        loginCode: loginRes.code,
+      });
+    } catch (error: any) {
+      console.error('wx.login 失败:', error);
+      this.setData({
+        loading: false,
+        errorMessage: '获取登录凭证失败',
+        loginError: '获取登录凭证失败',
+      });
+      wx.showToast({
+        title: '登录失败',
+        icon: 'none',
+      });
+    }
   },
 
   /**
@@ -116,21 +115,34 @@ Page({
    */
   async loginWithUserInfo(code: string, userInfo: any) {
     try {
-      this.setData({ loading: true, loginError: '' });
+      this.setData({ loading: true, errorMessage: '', loginError: '' });
 
-      // 调用云函数登录
+      // 2. 获取用户信息（如果还没有）
+      let finalUserInfo = userInfo;
+      if (!finalUserInfo) {
+        const userProfile: any = await new Promise((resolve, reject) => {
+          wx.getUserProfile({
+            desc: '用于完善用户资料',
+            success: resolve,
+            fail: reject,
+          });
+        });
+        finalUserInfo = userProfile.userInfo;
+      }
+
+      // 3. 调用登录云函数
       const result = await wx.cloud.callFunction({
         name: 'loginUser',
         data: {
           code: code,
-          userInfo: userInfo,
+          userInfo: finalUserInfo,
         },
       });
 
       if (result.result.success) {
-        // 登录成功
-        wx.setStorageSync('token', result.result.token);
+        // 保存用户信息和token
         wx.setStorageSync('userInfo', result.result.userInfo);
+        wx.setStorageSync('token', result.result.token);
 
         this.setData({ loading: false });
 
@@ -146,6 +158,7 @@ Page({
       } else {
         this.setData({
           loading: false,
+          errorMessage: result.result.error || '登录失败',
           loginError: result.result.error || '登录失败',
         });
         wx.showToast({
@@ -154,29 +167,47 @@ Page({
         });
       }
     } catch (error: any) {
-      console.error('登录接口调用失败:', error);
+      console.error('登录失败:', error);
       this.setData({
         loading: false,
-        loginError: '网络错误，请重试',
+        errorMessage: '登录失败，请重试',
+        loginError: '登录失败，请重试',
       });
       wx.showToast({
-        title: '网络错误',
+        title: '登录失败，请重试',
         icon: 'none',
       });
     }
   },
 
   /**
-   * 切换登录方式
+   * 显示手机号登录表单
    */
-  switchLoginType(e: any) {
-    const type = e.currentTarget.dataset.type;
+  showPhoneLogin() {
     this.setData({
-      loginType: type,
+      showPhoneForm: true,
       loginError: '',
+      errorMessage: '',
+    });
+  },
+
+  /**
+   * 隐藏手机号登录表单
+   */
+  hidePhoneLogin() {
+    this.setData({
+      showPhoneForm: false,
       phone: '',
       verifyCode: '',
+      loginError: '',
     });
+  },
+
+  /**
+   * 微信一键登录（快速登录）
+   */
+  async wxQuickLogin() {
+    await this.wxLogin();
   },
 
   /**
@@ -342,14 +373,24 @@ Page({
           icon: 'success',
         });
 
-        // 跳转到入口页面
+        // 隐藏手机登录表单
+        this.setData({ showPhoneForm: false });
+
+        // 跳转到入口页面，让用户选择角色
         setTimeout(() => {
+          // 清除之前选择的角色，让用户重新选择
+          try {
+            (wx as any).removeStorageSync('selectedRole');
+          } catch (e) {
+            // 忽略错误
+          }
           wx.reLaunch({ url: '/pages/entry/entry' });
         }, 1000);
       } else {
         this.setData({
           loading: false,
           loginError: result.result.error || '登录失败',
+          errorMessage: result.result.error || '登录失败',
         });
         wx.showToast({
           title: result.result.error || '登录失败',
@@ -361,12 +402,35 @@ Page({
       this.setData({
         loading: false,
         loginError: '网络错误，请重试',
+        errorMessage: '网络错误，请重试',
       });
       wx.showToast({
         title: '网络错误',
         icon: 'none',
       });
     }
+  },
+
+  /**
+   * 查看用户协议
+   */
+  viewAgreement() {
+    wx.showModal({
+      title: '用户协议',
+      content: '这里是用户协议内容...',
+      showCancel: false,
+    });
+  },
+
+  /**
+   * 查看隐私政策
+   */
+  viewPrivacy() {
+    wx.showModal({
+      title: '隐私政策',
+      content: '这里是隐私政策内容...',
+      showCancel: false,
+    });
   },
 });
 

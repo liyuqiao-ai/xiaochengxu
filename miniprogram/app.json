@@ -42,6 +42,17 @@
         "pages/promotion/promotion",
         "pages/commission/commission"
       ]
+    },
+    {
+      "root": "admin-dashboard",
+      "pages": [
+        "pages/login/index",
+        "pages/index/index",
+        "pages/users/index",
+        "pages/orders/index",
+        "pages/finance/index",
+        "pages/system/index"
+      ]
     }
   ],
   "window": {

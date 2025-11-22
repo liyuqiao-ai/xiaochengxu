@@ -18,6 +18,49 @@ cloud.init({
 const db = createDatabase();
 
 /**
+ * 通过阿里云发送短信（示例）
+ * 需要安装：npm install @alicloud/sms-sdk
+ */
+async function sendSMSViaAliyun(phone: string, code: string): Promise<void> {
+  // 示例代码，需要配置阿里云AccessKey
+  // const SMSClient = require('@alicloud/sms-sdk');
+  // const client = new SMSClient({
+  //   accessKeyId: process.env.ALIYUN_ACCESS_KEY_ID,
+  //   secretAccessKey: process.env.ALIYUN_ACCESS_KEY_SECRET,
+  // });
+  // await client.sendSMS({
+  //   PhoneNumbers: phone,
+  //   SignName: process.env.ALIYUN_SMS_SIGN_NAME,
+  //   TemplateCode: process.env.ALIYUN_SMS_TEMPLATE_CODE,
+  //   TemplateParam: JSON.stringify({ code }),
+  // });
+  console.log('阿里云短信服务未配置，跳过发送');
+}
+
+/**
+ * 通过腾讯云发送短信（示例）
+ * 需要安装：npm install tencentcloud-sdk-nodejs
+ */
+async function sendSMSViaTencent(phone: string, code: string): Promise<void> {
+  // 示例代码，需要配置腾讯云SecretId和SecretKey
+  // const tencentcloud = require('tencentcloud-sdk-nodejs');
+  // const SmsClient = tencentcloud.sms.v20210111.Client;
+  // const client = new SmsClient({
+  //   credential: {
+  //     secretId: process.env.TENCENT_SECRET_ID,
+  //     secretKey: process.env.TENCENT_SECRET_KEY,
+  //   },
+  // });
+  // await client.SendSms({
+  //   PhoneNumberSet: [phone],
+  //   SmsSdkAppId: process.env.TENCENT_SMS_APP_ID,
+  //   TemplateId: process.env.TENCENT_SMS_TEMPLATE_ID,
+  //   TemplateParamSet: [code],
+  // });
+  console.log('腾讯云短信服务未配置，跳过发送');
+}
+
+/**
  * 生成6位随机验证码
  */
 function generateVerifyCode(): string {
@@ -74,16 +117,29 @@ export const main = async (event: any) => {
       },
     });
 
-    // 5. 发送短信（这里使用模拟发送，实际应该调用短信服务商API）
-    // 注意：微信小程序云开发不直接支持发送短信，需要：
-    // 1. 使用第三方短信服务（如阿里云、腾讯云SMS）
-    // 2. 或者使用微信云开发的HTTP API调用外部服务
-    // 3. 开发环境可以打印验证码到控制台用于测试
-    
+    // 5. 发送短信
+    // 注意：微信小程序云开发不直接支持发送短信，需要集成第三方短信服务
+    // 开发环境：打印验证码到控制台
     console.log(`[测试环境] 手机号 ${phone} 的验证码: ${verifyCode}`);
     
-    // 实际生产环境应该调用短信服务API，例如：
-    // await sendSMSViaThirdParty(phone, verifyCode);
+    // 生产环境：调用第三方短信服务API
+    // 示例：集成阿里云短信服务
+    if (process.env.NODE_ENV === 'production' && process.env.SMS_PROVIDER === 'aliyun') {
+      try {
+        await sendSMSViaAliyun(phone, verifyCode);
+      } catch (smsError) {
+        console.error('发送短信失败:', smsError);
+        // 短信发送失败不影响验证码保存，用户可以通过其他方式获取
+      }
+    }
+    // 示例：集成腾讯云短信服务
+    else if (process.env.NODE_ENV === 'production' && process.env.SMS_PROVIDER === 'tencent') {
+      try {
+        await sendSMSViaTencent(phone, verifyCode);
+      } catch (smsError) {
+        console.error('发送短信失败:', smsError);
+      }
+    }
 
     // 6. 返回成功（生产环境不应该返回验证码，这里仅用于测试）
     return createSuccessResponse({

@@ -19,9 +19,9 @@ export function isValidStatusTransition(
   const validTransitions: Record<OrderStatus, OrderStatus[]> = {
     pending: ['quoted', 'cancelled'],
     quoted: ['confirmed', 'cancelled'],
-    confirmed: ['in_progress', 'cancelled', 'completed'], // ✅ 添加completed
+    confirmed: ['in_progress', 'cancelled'], // 修复：confirmed只能转换到in_progress或cancelled
     in_progress: ['completed', 'cancelled'],
-    completed: ['cancelled'], // ✅ 允许已完成订单被取消
+    completed: ['cancelled'], // 允许已完成订单被取消
     cancelled: [], // 取消后不可再变更
   };
 

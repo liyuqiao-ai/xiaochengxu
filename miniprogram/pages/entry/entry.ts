@@ -5,19 +5,23 @@
 Page({
   data: {
     userInfo: null as any,
+    showLoginTip: false,
   },
 
   onLoad() {
+    // 检查用户是否已登录
     const userInfo = wx.getStorageSync('userInfo');
     const token = wx.getStorageSync('token');
 
     if (userInfo && token) {
-      // 已登录用户直接跳转到对应角色工作台
+      // 已登录用户直接跳转到对应角色
       this.setData({ userInfo });
       this.redirectToRole(userInfo.role);
-    } else {
-      this.loadUserInfo();
+      return;
     }
+
+    // 未登录用户显示登录提示
+    this.setData({ showLoginTip: true });
   },
 
   /**
@@ -86,52 +90,43 @@ Page({
     // 验证用户是否登录
     if (!userInfo) {
       wx.showModal({
-        title: '权限提示',
-        content: `您当前的角色是未登录，无法访问${this.getRoleName(role)}端`,
-        showCancel: false,
-        success: () => {
-          wx.navigateTo({
-            url: '/pages/login/login',
-          });
+        title: '请先登录',
+        content: '需要登录后才能使用该功能',
+        success: (res) => {
+          if (res.confirm) {
+            wx.navigateTo({ url: '/pages/login/login' });
+          }
         },
       });
       return;
     }
 
     // 验证用户角色权限
-    if (userInfo.role && userInfo.role !== role) {
+    if (userInfo.role !== role) {
       wx.showModal({
-        title: '权限提示',
-        content: `您当前的角色是${this.getRoleName(userInfo.role)}，无法访问${this.getRoleName(role)}端`,
+        title: '权限不足',
+        content: `您的账户角色为${this.getRoleName(userInfo.role)}，无法访问${this.getRoleName(role)}端功能`,
         showCancel: false,
-        success: () => {
-          wx.navigateTo({
-            url: '/pages/login/login',
-          });
-        },
       });
       return;
     }
 
-    // 根据角色跳转到对应工作台
-    switch (role) {
-      case 'farmer':
-        wx.reLaunch({ url: '/farmer/pages/index/index' });
-        break;
-      case 'worker':
-        wx.reLaunch({ url: '/worker/pages/index/index' });
-        break;
-      case 'contractor':
-        wx.reLaunch({ url: '/contractor/pages/index/index' });
-        break;
-      case 'introducer':
-        wx.reLaunch({ url: '/introducer/pages/index/index' });
-        break;
-      default:
-        wx.showToast({
-          title: '无效的角色',
-          icon: 'none',
-        });
+    // 根据角色跳转
+    const rolePaths: Record<string, string> = {
+      farmer: '/farmer/pages/index/index',
+      worker: '/worker/pages/index/index',
+      contractor: '/contractor/pages/index/index',
+      introducer: '/introducer/pages/index/index',
+    };
+
+    const targetPath = rolePaths[role];
+    if (targetPath) {
+      wx.reLaunch({ url: targetPath });
+    } else {
+      wx.showToast({
+        title: '无效的角色',
+        icon: 'none',
+      });
     }
   },
 
@@ -139,11 +134,8 @@ Page({
    * 去登录
    */
   goToLogin() {
-    // 登录功能将在后续版本实现
-    wx.showModal({
-      title: '提示',
-      content: '请先选择角色，登录功能将在后续版本实现',
-      showCancel: false,
+    wx.reLaunch({
+      url: '/pages/login/login',
     });
   },
 });

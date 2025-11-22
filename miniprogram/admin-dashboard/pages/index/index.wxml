@@ -1,0 +1,90 @@
+<view class="dashboard-container">
+  <!-- 数据统计卡片 -->
+  <view class="stats-grid">
+    <view class="stat-card" bindtap="navigateToUsers">
+      <view class="stat-icon">👥</view>
+      <view class="stat-content">
+        <text class="stat-number">{{dashboardData.totalUsers}}</text>
+        <text class="stat-label">总用户数</text>
+        <text class="stat-trend {{dashboardData.userTrend}}">
+          {{dashboardData.userGrowth > 0 ? '↑' : '↓'}}
+          {{Math.abs(dashboardData.userGrowth)}}%
+        </text>
+      </view>
+    </view>
+
+    <view class="stat-card" bindtap="navigateToOrders">
+      <view class="stat-icon">📋</view>
+      <view class="stat-content">
+        <text class="stat-number">{{dashboardData.activeOrders}}</text>
+        <text class="stat-label">进行中订单</text>
+        <text class="stat-trend">
+          完成率 {{dashboardData.orderCompletionRate}}%
+        </text>
+      </view>
+    </view>
+
+    <view class="stat-card" bindtap="navigateToFinance">
+      <view class="stat-icon">💰</view>
+      <view class="stat-content">
+        <text class="stat-number">{{dashboardData.todayIncome}}</text>
+        <text class="stat-label">今日收入</text>
+        <text class="stat-trend">
+          总额 ¥{{dashboardData.totalIncome}}
+        </text>
+      </view>
+    </view>
+
+    <view class="stat-card" bindtap="navigateToSystem">
+      <view class="stat-icon">⚙️</view>
+      <view class="stat-content">
+        <text class="stat-number">{{dashboardData.platformFee}}</text>
+        <text class="stat-label">平台费率</text>
+        <text class="stat-trend">
+          {{dashboardData.feeRate}}%
+        </text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 快捷操作 -->
+  <view class="quick-actions">
+    <text class="section-title">快捷操作</text>
+    <view class="action-grid">
+      <button class="action-btn" bindtap="navigateToUsers">
+        <view class="action-icon">👤</view>
+        <text>用户管理</text>
+      </button>
+      <button class="action-btn" bindtap="navigateToOrders">
+        <view class="action-icon">📊</view>
+        <text>订单监控</text>
+      </button>
+      <button class="action-btn" bindtap="navigateToFinance">
+        <view class="action-icon">💳</view>
+        <text>财务管理</text>
+      </button>
+      <button class="action-btn" bindtap="navigateToSystem">
+        <view class="action-icon">🔧</view>
+        <text>系统配置</text>
+      </button>
+    </view>
+  </view>
+
+  <!-- 最近活动 -->
+  <view class="recent-activities">
+    <text class="section-title">最近活动</text>
+    <view class="activity-list">
+      <view class="activity-item" wx:for="{{recentActivities}}" wx:key="id">
+        <view class="activity-icon">{{item.icon}}</view>
+        <view class="activity-content">
+          <text class="activity-text">{{item.content}}</text>
+          <text class="activity-time">{{item.time}}</text>
+        </view>
+      </view>
+      <view class="empty" wx:if="{{recentActivities.length === 0}}">
+        <text>暂无活动记录</text>
+      </view>
+    </view>
+  </view>
+</view>
+
