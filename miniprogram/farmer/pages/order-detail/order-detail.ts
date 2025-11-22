@@ -245,7 +245,16 @@ Page({
   },
 
   /**
-   * 立即支付
+   * 跳转到支付页面
+   */
+  goToPayment() {
+    wx.navigateTo({
+      url: `/farmer/pages/payment/payment?orderId=${this.data.orderId}`,
+    });
+  },
+
+  /**
+   * 立即支付（直接支付）
    */
   async makePayment() {
     const { order } = this.data;

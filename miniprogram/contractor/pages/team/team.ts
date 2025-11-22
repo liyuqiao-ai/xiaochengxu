@@ -29,7 +29,7 @@ Page({
    * 切换标签
    */
   onTabChange(e: any) {
-    const index = e.detail.index;
+    const index = parseInt(e.currentTarget.dataset.index || e.detail.index || 0);
     this.setData({ activeTab: index });
     this.loadData();
   },
@@ -41,37 +41,28 @@ Page({
     try {
       this.setData({ loading: true });
 
-      if (this.data.activeTab === 0) {
-        // 加载团队成员
-        const result = await wx.cloud.callFunction({
+      // 并行加载团队成员和待审核申请
+      const [membersResult, requestsResult] = await Promise.all([
+        wx.cloud.callFunction({
           name: 'getTeamMembers',
           data: {},
-        });
-
-        if (result.result.success) {
-          const members = result.result.data?.members || [];
-          this.setData({
-            teamMembers: members,
-            'teamStats.totalMembers': members.length,
-            loading: false,
-          });
-        }
-      } else {
-        // 加载入队申请
-        const result = await wx.cloud.callFunction({
+        }).catch(() => ({ result: { success: false, data: { members: [] } } })),
+        wx.cloud.callFunction({
           name: 'getPendingRequests',
           data: {},
-        });
+        }).catch(() => ({ result: { success: false, data: { requests: [] } } })),
+      ]);
 
-        if (result.result.success) {
-          const requests = result.result.data?.requests || [];
-          this.setData({
-            pendingRequests: requests,
-            'teamStats.pendingRequests': requests.length,
-            loading: false,
-          });
-        }
-      }
+      const members = membersResult.result.data?.members || [];
+      const requests = requestsResult.result.data?.requests || [];
+
+      this.setData({
+        teamMembers: members,
+        pendingRequests: requests,
+        'teamStats.totalMembers': members.length,
+        'teamStats.pendingRequests': requests.length,
+        loading: false,
+      });
     } catch (error) {
       this.setData({ loading: false });
       console.error('加载数据失败:', error);

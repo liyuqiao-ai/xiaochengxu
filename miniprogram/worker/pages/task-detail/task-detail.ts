@@ -9,6 +9,7 @@ Page({
     loading: false,
     hasApplied: false, // 是否已申请
     applicationStatus: '', // 申请状态: pending, approved, rejected
+    isTeamMember: false, // 是否已是团队成员
   },
 
   onLoad(options: any) {
@@ -60,6 +61,7 @@ Page({
         this.setData({
           hasApplied: false,
           applicationStatus: '',
+          isTeamMember: false,
         });
       }
 
@@ -75,12 +77,92 @@ Page({
     }
   },
 
-  data: {
-    taskId: '',
-    task: null as any,
-    loading: false,
-    hasApplied: false, // 是否已申请
-    applicationStatus: '', // 申请状态
+  /**
+   * 检查申请状态
+   */
+  async checkApplicationStatus() {
+    const userInfo = wx.getStorageSync('userInfo');
+    const { task } = this.data;
+    if (!userInfo || !task || !task.contractorId) return;
+
+    // 检查是否已是团队成员
+    if (userInfo.contractorId === task.contractorId) {
+      this.setData({ 
+        isTeamMember: true, 
+        applicationStatus: 'approved',
+        hasApplied: true,
+      });
+      return;
+    }
+
+    try {
+      const result = await wx.cloud.callFunction({
+        name: 'getApplicationStatus',
+        data: {
+          workerId: userInfo._id,
+          contractorId: task.contractorId,
+        },
+      });
+      
+      if (result.result.success && result.result.status) {
+        this.setData({
+          hasApplied: true,
+          applicationStatus: result.result.status,
+          isTeamMember: result.result.status === 'approved',
+        });
+      }
+    } catch (error) {
+      console.error('检查申请状态失败:', error);
+    }
+  },
+
+  /**
+   * 申请加入团队
+   */
+  async joinTeam() {
+    const { task } = this.data;
+    if (!task || !task.contractorId) {
+      wx.showToast({ title: '任务信息不完整', icon: 'none' });
+      return;
+    }
+
+    wx.showModal({
+      title: '确认申请',
+      content: '确定要申请加入此工头的团队吗？',
+      success: async (res) => {
+        if (res.confirm) {
+          try {
+            wx.showLoading({ title: '提交中...' });
+            const result = await wx.cloud.callFunction({
+              name: 'joinTeam',
+              data: {
+                contractorId: task.contractorId,
+                orderId: task._id,
+                message: '申请加入您的团队',
+              },
+            });
+            wx.hideLoading();
+            
+            if (result.result.success) {
+              wx.showToast({ title: '申请已提交', icon: 'success' });
+              this.setData({ 
+                hasApplied: true, 
+                applicationStatus: 'pending' 
+              });
+            } else {
+              wx.showToast({ 
+                title: result.result.error || '申请失败', 
+                icon: 'none' 
+              });
+            }
+          } catch (error) {
+            wx.hideLoading();
+            console.error('申请加入团队失败:', error);
+            wx.showToast({ title: '申请失败', icon: 'none' });
+          }
+        }
+      },
+    });
   },
 
   /**
@@ -146,6 +228,21 @@ Page({
                     icon: 'success',
                   });
                 },
+              });
+            }
+          },
+        });
+      } else {
+        wx.showToast({
+          title: '获取工头信息失败',
+          icon: 'none',
+        });
+      }
+    } catch (error) {
+      console.error('联系工头失败:', error);
+      wx.showToast({
+        title: '获取联系方式失败',
+        icon: 'none',
       });
     }
   },
@@ -225,21 +322,6 @@ Page({
       },
     });
   },
-});
-      } else {
-        wx.showToast({
-          title: '获取工头信息失败',
-          icon: 'none',
-        });
-      }
-    } catch (error) {
-      console.error('联系工头失败:', error);
-      wx.showToast({
-        title: '获取联系方式失败',
-        icon: 'none',
-      });
-    }
-  },
 
   /**
    * 查看地图位置
@@ -280,4 +362,3 @@ Page({
     return statusMap[status] || status;
   },
 });
-
